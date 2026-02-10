@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eternity - The Infinite Library</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body,
+        html {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        #main-content {
+            opacity: 0;
+            filter: blur(20px);
+            transition: opacity 2s ease, filter 2.5s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('assets/images/Eternity.png');
+            background-size: cover;
+            background-position: center;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+
+        .story-section {
+            max-width: 800px;
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .story-section h1 {
+            font-size: 4rem;
+            color: var(--gold);
+            margin-bottom: 1rem;
+        }
+
+        .story-text {
+            font-size: 1.2rem;
+            color: var(--text-light);
+            background: rgba(0, 0, 0, 0.6);
+            padding: 2rem;
+            border-radius: 10px;
+            border-left: 4px solid var(--purple);
+        }
+
+        .navigation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .part-card {
+            padding: 2rem;
+            text-align: center;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 350px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .part-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1;
+        }
+
+        .part-card * {
+            position: relative;
+            z-index: 2;
+        }
+
+        .part-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--gold);
+        }
+
+        .part-card h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--gold);
+        }
+
+        .part-card p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .btn-enter {
+            margin-top: 1.5rem;
+            padding: 0.8rem 1.5rem;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            display: inline-block;
+            transition: 0.3s;
+        }
+
+        .btn-enter:hover {
+            background: var(--gold);
+            color: #000;
+        }
+
+        /* Lock SVG Styles */
+        .lock-path {
+            fill: none;
+            stroke: var(--gold);
+            stroke-width: 2;
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: draw 3s forwards;
+        }
+
+        @keyframes draw {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="lock-screen">
+        <div class="lock-container">
+            <svg class="chain-svg" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="45" class="lock-path" />
+                <!-- <path d="M30 40 L70 60 M30 60 L70 40" stroke="var(--purple)" stroke-width="2" /> -->
+            </svg>
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+
+                <img src="assets/images/Eternal.png" id="lock-btn" class="lock-icon" alt="Lock">
+            </div>
+        </div>
+        <div class="lock-status cinzel text-glow-gold">Touch to Unlock Eternity</div>
+    </div>
+
+    <main id="main-content">
+        <section class="story-section">
+            <h1 class="text-glow-gold">ETERNITY</h1>
+            <div class="story-text">
+                <p>โลกซึ่งกาลเวลาไม่อาจพราก และเรื่องราวไม่เคยดับสูญ
+                    ที่แห่งนี้ดำรงอยู่ได้ด้วยถ้อยคำ ความทรงจำ และนิทานอันไร้ขอบเขต
+                    ทุกบทบันทึกคือเศษเสี้ยวของตัวตน ทุกเรื่องเล่าคือแรงผลักดันให้โลกยังคงหายใจ</p>
+            </div>
+        </section>
+
+        <div class="navigation-grid">
+            <div class="part-card glass" style="background-image: url('assets/images/StoryLamp.png');">
+                <h2 class="cinzel">I : Winchester Library</h2>
+                <p>ณ ใจกลางของความนิรันดร์
+                    Winchester Library ยืนหยัดราวประตูสู่เรื่องราวทั้งปวง
+                    รวบรวมตำนาน ความฝัน และชะตากรรมที่ถูกจารึก
+                    เพื่อให้ผู้มาเยือนได้ค้นพบตนเอง ผ่านหน้ากระดาษที่ไม่มีวันสิ้นสุด</p>
+                <a href="winchester.html" class="btn-enter">Enter Library</a>
+            </div>
+
+            <div class="part-card glass" style="background-image: url('assets/images/RachataHouse.png');">
+                <h2 class="cinzel">II : Rachata House</h2>
+                <p>ตระกูลเวทมนตร์ผู้พิทักษ์ความลับและความทรงจำ</p>
+                <a href="rachata_house.html" class="btn-enter">Enter House</a>
+            </div>
+
+            <div class="part-card glass" style="background-image: url('assets/images/RachataSchool.png');">
+                <h2 class="cinzel">III : Rachata School</h2>
+                <p>โรงเรียนพ่อมดแม่มดศาสตร์รชต โรงเรียนสอนเวทมนตร์แห่งประเทศไทย</p>
+                <a href="rachata_school.html" class="btn-enter">Enter School</a>
+            </div>
+
+            <div class="part-card glass" style="background-image: url('assets/images/WorldThailand.png');">
+                <h2 class="cinzel">IV : World Thailand</h2>
+                <p>สารานุกรมโลกเวทมนตร์แห่งสุวรรณภูมิ สถานที่ ประวัติศาสตร์ ธนาคารนาคราช และสัตว์หิมพานต์</p>
+                <a href="world_thailand.html" class="btn-enter">Explore World</a>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/lock.js"></script>
+</body>
+
+</html>

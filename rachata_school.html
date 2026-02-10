@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rachata School of Wizardry | Eternity</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/house-modal.css">
+    <link rel="stylesheet" href="css/school-content.css">
+    <style>
+        .hero {
+            height: 60vh;
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.8)), url('assets/images/school_thumb.png');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            border-bottom: 3px solid var(--gold);
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            color: var(--gold);
+            text-shadow: 0 0 20px var(--gold-glow);
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 4rem 1rem;
+        }
+
+        section {
+            margin-bottom: 6rem;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 1s ease;
+        }
+
+        section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            color: var(--gold);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .section-title::after {
+            content: '';
+            flex-grow: 1;
+            height: 1px;
+            background: linear-gradient(to right, var(--gold), transparent);
+        }
+
+        .item-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background: rgba(20, 20, 20, 0.8);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            padding: 1.5rem;
+            border-radius: 10px;
+            transition: transform 0.3s, border-color 0.3s;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+            border-color: var(--purple-light);
+        }
+
+        /* สไตล์รูปภาพใน card ให้สมส่วน */
+        .card img {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 2px solid rgba(212, 175, 55, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover img {
+            transform: scale(1.05);
+            border-color: var(--purple-light);
+        }
+
+        .card h3 {
+            color: var(--gold);
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+
+        .card p {
+            color: var(--text-light);
+            font-size: 0.95rem;
+            text-align: center;
+            opacity: 0.9;
+        }
+
+        .ranking-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(40, 0, 80, 0.1);
+        }
+
+        .ranking-table th,
+        .ranking-table td {
+            text-align: left;
+            padding: 1rem;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .ranking-table th {
+            color: var(--gold);
+            text-transform: uppercase;
+        }
+
+        .archive-box {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .reward {
+            padding: 1rem;
+            background: var(--purple);
+            color: var(--gold);
+            border-radius: 5px;
+            font-weight: bold;
+            border: 1px solid var(--gold);
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        .nav-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--gold);
+        }
+
+        .back-home {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        .houses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .house-card {
+            position: relative;
+            background: rgba(10, 10, 10, 0.8);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            padding: 2.5rem 1.5rem;
+            border-radius: 15px;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .house-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--accent-color);
+            transition: height 0.3s;
+        }
+
+        .house-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--accent-color);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px var(--accent-glow);
+        }
+
+        .house-card:hover::before {
+            height: 100%;
+            opacity: 0.1;
+        }
+
+        .house-badge {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 1.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid var(--accent-color);
+            box-shadow: 0 0 15px var(--accent-glow);
+            transition: transform 0.5s ease;
+            overflow: hidden;
+        }
+
+        .house-badge img {
+            width: 85%;
+            height: 85%;
+            object-fit: contain;
+        }
+
+        .house-card:hover .house-badge {
+            transform: rotateY(360deg);
+        }
+
+        .house-name-th {
+            font-size: 1.4rem;
+            color: var(--gold);
+            margin: 0.5rem 0;
+            font-weight: bold;
+        }
+
+        .house-name-en {
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            color: var(--accent-color);
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .house-desc {
+            font-size: 0.9rem;
+            color: #ddd;
+            line-height: 1.5;
+        }
+
+        /* House Themes */
+        .house-garuda {
+            --accent-color: #ff4d4d;
+            --accent-glow: rgba(255, 77, 77, 0.3);
+        }
+
+        .house-erawan {
+            --accent-color: #3498db;
+            --accent-glow: rgba(52, 152, 219, 0.3);
+        }
+
+        .house-qilin {
+            --accent-color: #2ecc71;
+            --accent-glow: rgba(46, 204, 113, 0.3);
+        }
+
+        .house-naga {
+            --accent-color: #444444;
+            /* Changed slightly for better visibility against dark bg */
+            --accent-glow: rgba(255, 255, 255, 0.1);
+            background: rgba(5, 5, 5, 0.9) !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav>
+        <div class="nav-brand cinzel">ETERNITY</div>
+        <a href="index.html" class="back-home">← Back to World Map</a>
+    </nav>
+
+    <header class="hero">
+        <h1 class="cinzel">Rachata School of Wizardry</h1>
+        <p class="cinzel" style="color: var(--purple-light);">The Premier Magical Institute of Thailand</p>
+    </header>
+
+    <div class="container">
+
+        <section id="history">
+            <h2 class="section-title cinzel">History</h2>
+            <div class="card glass">
+                <p>โรงเรียนพ่อมดแม่มดศาสตร์รชต (Rachata School of Wizardry) หรือ โรงเรียนรชต (ระ-ชะ-ตะ)
+                    โรงเรียนสอนเวทมนตร์ศาสตร์ของพ่อมดแม่มดแห่งประเทศไทย ก่อตั้งมานานนับสหัสวรรษตั้งแต่ปีพุทธศักราช 1500
+                    ซึ่งเปิดการสอนนักเรียนอายุสิบหกปีถึงยี่สิบปี (16 - 20 ปี)
+                    ถูกจัดอันดับโรงเรียนเวทมนตร์ที่ดีที่สุดอันดับ 5 โดยนิตยสารพ่อมดแม่มดรายสัปดาห์ ก่อตั้งโดย
+                    ผู้นำของตระกูลรชต ณ สมัยนั้น
+                    <br><br>
+                    รชตก่อตั้งขึ้นมาอย่างยาวนานนับพันปี
+                    โดยตระกูลพ่อมดแม่มดเชื้อสายดั้งเดิมของประเทศไทยที่ยิ่งใหญ่มากในยุคนั้น "ตระกูลรชต" ซึ่งมี เฮลิออส
+                    รชต เป็นผู้นำตระกูลในขณะนั้น เขามีความกังวลเกี่ยวกับพ่อมดแม่มดที่เกิดใหม่ในช่วงนั้นเป็นอย่างมาก
+                    เนื่องจากชุมชนผู้วิเศษในขณะนั้นเต็มไปด้วยความวุ่นวายและเสี่ยงต่อการเปิดเผยต่ออเวทย์*
+                    เขาจึงก่อตั้งโรงเรียนสอนเวทมนตร์สำหรับพ่อมดแม่มดขึ้นมา
+                    แต่ก็มีข่าวลือว่ากันว่าที่เขาก่อตั้งโรงเรียนขึ้นนั้น
+                    เพื่อถ่วงอำนาจสมดุลของกระทรวงเวทมนตร์ที่ขณะนั้นมีอำนาจเป็นอย่างมากถึงขั้นถูกเรียกว่า เผด็จการ
+                    <br><br>
+                    ตำแหน่งที่ตั้งของโรงเรียนนั้น ว่ากันว่าถูกตั้งอยู่จุดบนสุดของประเทศไทย
+                    โรงเรียนมีลักษณะอาคารเหมือนพระราชวังหลวงสมัยอยุธยา บางอาคารออกแบบร่วมสมัยเพื่อปรับเปลี่ยนตามยุคสมัย
+                    รอบ ๆ ของโรงเรียนถูกปกคลุมไปด้วยผืนป่าและทะเลสาบขนาดเล็ก ไม่ห่างจากของโรงเรียนมากนัก
+                    มีป่าลึกลับที่จะเปลี่ยนลักษณะภูมิประเทศทุกชั่วโมงจนหาทางออกยาก เรียกว่า 'ป่าหิมพานต์'
+                    และยังเป็นที่อยู่อาศัยของสัตว์วิเศษ หรือเป็นที่รู้จักว่า 'สัตว์หิมพานต์'
+                    <br>
+
+                    ​<br>
+
+                    อเวทย์* คำที่ใช้เรียกผู้ที่ไม่มีเวทมนตร์
+                </p>
+            </div>
+        </section>
+
+        <section id="houses">
+            <h2 class="section-title cinzel">The Four Houses</h2>
+            <div class="houses-grid">
+                <!-- Garuda House -->
+                <div class="house-card house-garuda">
+                    <div class="house-badge">
+                        <img src="assets/images/Garuda.png" alt="Garuda House Badge">
+                    </div>
+                    <div class="house-name-th">พญาครุฑ</div>
+                    <div class="house-name-en">GARUDA HOUSE</div>
+                    <p class="house-desc">บ้านแห่งความกล้าหาญและพละกำลัง เปี่ยมด้วยจิตวิญญาณของนักรบผู้พิทักษ์</p>
+                </div>
+
+                <!-- Erawan House -->
+                <div class="house-card house-erawan">
+                    <div class="house-badge">
+                        <img src="assets/images/Erawan.png" alt="Erawan House Badge">
+                    </div>
+                    <div class="house-name-th">เอราวัณ</div>
+                    <div class="house-name-en">ERAWAN HOUSE</div>
+                    <p class="house-desc">บ้านแห่งบารมีและความบริสุทธิ์ ตัวแทนของความมั่นคงและจริยธรรมที่ผุดผ่อง</p>
+                </div>
+
+                <!-- Qilin House -->
+                <div class="house-card house-qilin">
+                    <div class="house-badge">
+                        <img src="assets/images/Qilin.png" alt="Qilin House Badge">
+                    </div>
+                    <div class="house-name-th">กิเลน</div>
+                    <div class="house-name-en">QILIN HOUSE</div>
+                    <p class="house-desc">บ้านแห่งปัญญาและความโชคดี เน้นการเรียนรู้และความเมตตาต่อทุกสรรพสิ่ง</p>
+                </div>
+
+                <!-- Naga House -->
+                <div class="house-card house-naga">
+                    <div class="house-badge">
+                        <img src="assets/images/King of Nagas.png" alt="King of Nagas House Badge">
+                    </div>
+                    <div class="house-name-th">พญานาค</div>
+                    <div class="house-name-en">KING OF NAGAS HOUSE</div>
+                    <p class="house-desc">บ้านแห่งความเร้นลับและโชคลาภ ผู้ครองปัญญาจากห้วงลึกและมนตราโบราณ</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="ranking">
+            <h2 class="section-title cinzel">House Points</h2>
+            <table class="ranking-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Student Name</th>
+                        <th>Points</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Warut S.</td>
+                        <td>450</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Pimchanok K.</td>
+                        <td>410</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="members">
+            <h2 class="section-title cinzel">Faculty</h2>
+            <div class="item-grid">
+                <div class="card">
+                    <img src="assets/images/ProfRichard.png" alt="Prof">
+                    <h3>Prof. Richard Moore</h3>
+                    <p>Subject: Ancient Charms</p>
+                </div>
+                <div class="card">
+                    <img src="assets/images/ProfRichard.png" alt="Prof">
+                    <h3>Prof. Siri</h3>
+                    <p>Subject: Astral Botany</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="textbooks">
+            <h2 class="section-title cinzel">📖 หนังสือเรียน</h2>
+            <p style="text-align: center; color: var(--text-light); margin-bottom: 2rem;">
+                ตำราเรียนเวทมนตร์แต่ละชั้นปี — คลิกเพื่อเปิดอ่านออนไลน์
+            </p>
+
+            <!-- Year Tabs -->
+            <div class="textbook-tabs">
+                <button class="textbook-tab active" data-year="1">ชั้นปี 1</button>
+                <button class="textbook-tab" data-year="2">ชั้นปี 2</button>
+                <button class="textbook-tab" data-year="3">ชั้นปี 3</button>
+                <button class="textbook-tab" data-year="4">ชั้นปี 4</button>
+                <button class="textbook-tab" data-year="5">ชั้นปี 5</button>
+                <button class="textbook-tab" data-year="extra">พิเศษ</button>
+            </div>
+
+            <!-- Year 1 -->
+            <div class="textbook-panel active" id="textbook-year-1">
+                <div class="textbook-grid">
+                    <a href="https://online.fliphtml5.com/vsduq/xaby/" target="_blank" class="textbook-card">
+                        <div class="textbook-icon">📜</div>
+                        <div class="textbook-name">วิชาประวัติศาสตร์เวทมนตร์</div>
+                        <div class="textbook-status available">เปิดอ่าน →</div>
+                    </a>
+                    <a href="https://online.fliphtml5.com/vsduq/iule/" target="_blank" class="textbook-card">
+                        <div class="textbook-icon">⚗️</div>
+                        <div class="textbook-name">วิชาปรุงยา</div>
+                        <div class="textbook-status available">เปิดอ่าน →</div>
+                    </a>
+                    <a href="https://online.fliphtml5.com/vsduq/muke/" target="_blank" class="textbook-card">
+                        <div class="textbook-icon">✨</div>
+                        <div class="textbook-name">วิชาคาถา</div>
+                        <div class="textbook-status available">เปิดอ่าน →</div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Year 2 -->
+            <div class="textbook-panel" id="textbook-year-2">
+                <div class="textbook-grid">
+                    <div class="textbook-card locked">
+                        <div class="textbook-icon">🐲</div>
+                        <div class="textbook-name">วิชาดูแลสัตว์วิเศษ</div>
+                        <div class="textbook-status upcoming">🔒 เร็วๆ นี้</div>
+                    </div>
+                    <a href="https://online.fliphtml5.com/vsduq/lbzz/" target="_blank" class="textbook-card">
+                        <div class="textbook-icon">🌟</div>
+                        <div class="textbook-name">วิชาดาราศาสตร์</div>
+                        <div class="textbook-status available">เปิดอ่าน →</div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Year 3 -->
+            <div class="textbook-panel" id="textbook-year-3">
+                <div class="textbook-grid">
+                    <a href="https://online.fliphtml5.com/vsduq/opvp/" target="_blank" class="textbook-card">
+                        <div class="textbook-icon">🌿</div>
+                        <div class="textbook-name">วิชาสมุนไพรศาสตร์</div>
+                        <div class="textbook-status available">เปิดอ่าน →</div>
+                    </a>
+                    <div class="textbook-card locked">
+                        <div class="textbook-icon">🛡️</div>
+                        <div class="textbook-name">วิชาอเวทย์ศึกษา</div>
+                        <div class="textbook-status upcoming">⏳ กำลังจัดทำ</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Year 4 -->
+            <div class="textbook-panel" id="textbook-year-4">
+                <div class="textbook-grid">
+                    <a href="https://online.fliphtml5.com/vsduq/avqg/" target="_blank" class="textbook-card">
+                        <div class="textbook-icon">🦎</div>
+                        <div class="textbook-name">วิชาแปลงร่าง</div>
+                        <div class="textbook-status available">เปิดอ่าน →</div>
+                    </a>
+                    <a href="https://online.fliphtml5.com/vsduq/gejy/" target="_blank" class="textbook-card">
+                        <div class="textbook-icon">🔮</div>
+                        <div class="textbook-name">วิชาพยากรณ์ศาสตร์</div>
+                        <div class="textbook-status available">เปิดอ่าน →</div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Year 5 -->
+            <div class="textbook-panel" id="textbook-year-5">
+                <div class="textbook-grid">
+                    <a href="https://online.fliphtml5.com/vsduq/nrqp/" target="_blank" class="textbook-card">
+                        <div class="textbook-icon">⚔️</div>
+                        <div class="textbook-name">วิชาป้องกันตัวจากศาสตร์มืด</div>
+                        <div class="textbook-status available">เปิดอ่าน →</div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Extra -->
+            <div class="textbook-panel" id="textbook-year-extra">
+                <div class="textbook-grid">
+                    <a href="https://docs.google.com/document/d/1UkmXsLoiKgJpyf_c04I9ElkSk9QFyAmo1mSeESzf2S0/edit"
+                        target="_blank" class="textbook-card">
+                        <div class="textbook-icon">📋</div>
+                        <div class="textbook-name">วิชาปรุงยาเพิ่มเติม</div>
+                        <div class="textbook-status available">เปิดอ่าน →</div>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section id="archive">
+            <h2 class="section-title cinzel">House Victory Statistics</h2>
+            <p style="text-align: center; color: var(--text-light); margin-bottom: 2rem;">
+                สถิติการชนะเลิศของแต่ละบ้านในปีการศึกษานี้
+            </p>
+            <div class="house-stats-grid">
+                <div class="stat-card" style="--house-color: #ff4d4d;">
+                    <div class="stat-house-name">พญาครุฑ</div>
+                    <div class="stat-trophy">🦅</div>
+                    <div class="stat-count">12</div>
+                    <div class="stat-label">ครั้ง</div>
+                </div>
+                <div class="stat-card" style="--house-color: #3498db;">
+                    <div class="stat-house-name">เอราวัณ</div>
+                    <div class="stat-trophy">🐘</div>
+                    <div class="stat-count">15</div>
+                    <div class="stat-label">ครั้ง</div>
+                </div>
+                <div class="stat-card" style="--house-color: #2ecc71;">
+                    <div class="stat-house-name">กิเลน</div>
+                    <div class="stat-trophy">🦄</div>
+                    <div class="stat-count">18</div>
+                    <div class="stat-label">ครั้ง</div>
+                </div>
+                <div class="stat-card" style="--house-color: #95a5a6;">
+                    <div class="stat-house-name">พญานาค</div>
+                    <div class="stat-trophy">🐉</div>
+                    <div class="stat-count">10</div>
+                    <div class="stat-label">ครั้ง</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="crafting">
+            <h2 class="section-title cinzel">Crafting & Magical Items</h2>
+            <p style="text-align: center; color: var(--text-light); margin-bottom: 2rem;">
+                ไอเทมและน้ำยาเวทมนตร์ที่นักเรียนสามารถคราฟท์ได้
+            </p>
+            <div class="crafting-grid">
+                <div class="craft-card">
+                    <div class="craft-icon">⚗️</div>
+                    <div class="craft-name">น้ำยาเพิ่มพลัง</div>
+                    <div class="craft-ingredients">
+                        <h4>ส่วนผสม:</h4>
+                        <ul>
+                            <li>ดอกบัวหิมพานต์</li>
+                            <li>น้ำผึ้งทิพย์</li>
+                            <li>ผงดาวตก</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="craft-card">
+                    <div class="craft-icon">🔮</div>
+                    <div class="craft-name">ลูกแก้วทำนาย</div>
+                    <div class="craft-ingredients">
+                        <h4>ส่วนผสม:</h4>
+                        <ul>
+                            <li>คริสตัลบริสุทธิ์</li>
+                            <li>น้ำจันทร์เต็มดวง</li>
+                            <li>ละอองดาว</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="craft-card">
+                    <div class="craft-icon">🪄</div>
+                    <div class="craft-name">ไม้กายสิทธิ์เบื้องต้น</div>
+                    <div class="craft-ingredients">
+                        <h4>ส่วนผสม:</h4>
+                        <ul>
+                            <li>ไม้สักทอง</li>
+                            <li>หินมณี</li>
+                            <li>ขนนกครุฑ</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="craft-card">
+                    <div class="craft-icon">📿</div>
+                    <div class="craft-name">สายสิญจน์ป้องกัน</div>
+                    <div class="craft-ingredients">
+                        <h4>ส่วนผสม:</h4>
+                        <ul>
+                            <li>เชือกเงิน</li>
+                            <li>หินนพเก้า</li>
+                            <li>ดอกดารา</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="craft-card">
+                    <div class="craft-icon">💊</div>
+                    <div class="craft-name">ยารักษาบาดแผล</div>
+                    <div class="craft-ingredients">
+                        <h4>ส่วนผสม:</h4>
+                        <ul>
+                            <li>สมุนไพรทิพย์</li>
+                            <li>เกล็ดพญานาค</li>
+                            <li>น้ำค้าง</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="craft-card">
+                    <div class="craft-icon">🧪</div>
+                    <div class="craft-name">น้ำยาล่องหน</div>
+                    <div class="craft-ingredients">
+                        <h4>ส่วนผสม:</h4>
+                        <ul>
+                            <li>หยดน้ำมนตรา</li>
+                            <li>เงาจันทร์</li>
+                            <li>ควันธูป</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="activities">
+            <h2 class="section-title cinzel">School Activities</h2>
+            <p style="text-align: center; color: var(--text-light); margin-bottom: 2rem;">
+                กิจกรรมและงานเทศกาลต่างๆ ภายในโรงเรียน
+            </p>
+            <div class="activities-grid">
+                <div class="activity-card">
+                    <div class="activity-icon">🏆</div>
+                    <h3 class="activity-title">การแข่งขันจับด้ามไม้กายสิทธิ์</h3>
+                    <p class="activity-preview">
+                        การแข่งขันกีฬาประจำปีที่นักเรียนจากทุกบ้านแข่งขันด้วยไม้กายสิทธิ์บนฟากฟ้า</p>
+                    <div class="activity-date">📅 เดือน 11 - เดือน 12</div>
+                </div>
+                <div class="activity-card">
+                    <div class="activity-icon">🎭</div>
+                    <h3 class="activity-title">เทศกาลจันทร์เพ็ญ</h3>
+                    <p class="activity-preview">งานเฉลิมฉลองวันที่พลังเวทมนตร์แข็งแกร่งที่สุดในรอบปี</p>
+                    <div class="activity-date">📅 วันเพ็ญเดือน 12</div>
+                </div>
+                <div class="activity-card">
+                    <div class="activity-icon">📚</div>
+                    <h3 class="activity-title">การแข่งขันตอบปัญหาเวทมนตร์</h3>
+                    <p class="activity-preview">ทดสอบความรู้ด้านเวทมนตร์ศาสตร์และประวัติศาสตร์เวทย์มนต์</p>
+                    <div class="activity-date">📅 เดือน 6</div>
+                </div>
+                <div class="activity-card">
+                    <div class="activity-icon">🌺</div>
+                    <h3 class="activity-title">วันก่อตั้งโรงเรียน</h3>
+                    <p class="activity-preview">ระลึกถึงวันที่โรงเรียนรชตก่อตั้งขึ้นเมื่อพันปีก่อน</p>
+                    <div class="activity-date">📅 1 มกราคม</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="chapters">
+            <h2 class="section-title cinzel">School Chronicles</h2>
+            <p style="text-align: center; color: var(--text-light); margin-bottom: 2rem;">
+                เรื่องราวและบันทึกเหตุการณ์สำคัญที่เกิดขึ้นในโรงเรียน
+            </p>
+            <div class="chapter-container">
+                <div class="chapter-book">
+                    <div class="chapter-number">Chapter I</div>
+                    <h3 class="chapter-title">การมาถึงของนักเรียนใหม่</h3>
+                    <p class="chapter-preview">
+                        เรื่องราวเริ่มต้นเมื่อนักเรียนชั้นปีที่หนึ่งเดินทางมาถึงโรงเรียนรชตเป็นครั้งแรก...</p>
+                </div>
+                <div class="chapter-book">
+                    <div class="chapter-number">Chapter II</div>
+                    <h3 class="chapter-title">พิธีคัดเลือกเข้าบ้าน</h3>
+                    <p class="chapter-preview">ช่วงเวลาอันสำคัญที่จะกำหนดชะตากรรมของนักเรียนแต่ละคนว่าจะอยู่บ้านใด...
+                    </p>
+                </div>
+                <div class="chapter-book">
+                    <div class="chapter-number">Chapter III</div>
+                    <h3 class="chapter-title">บทเรียนแรก</h3>
+                    <p class="chapter-preview">วันแรกของการเรียนการสอน
+                        นักเรียนได้สัมผัสกับมนต์เสน่ห์ของเวทมนตร์ศาสตร์...</p>
+                </div>
+                <div class="chapter-book">
+                    <div class="chapter-number">Chapter IV</div>
+                    <h3 class="chapter-title">ความลับในห้องสมุด</h3>
+                    <p class="chapter-preview">การค้นพบห้องลับในห้องสมุดวินเชสเตอร์ที่เก็บงานเขียนโบราณอันน่าพิศวง...
+                    </p>
+                </div>
+                <div class="chapter-book">
+                    <div class="chapter-number">Chapter V</div>
+                    <h3 class="chapter-title">การผจญภัยในป่าหิมพานต์</h3>
+                    <p class="chapter-preview">เมื่อนักเรียนหลงเข้าไปในป่าหิมพานต์ที่เปลี่ยนแปลงอยู่เสมอ
+                        พวกเขาต้องเผชิญกับอันตราย...</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="admission">
+            <h2 class="section-title cinzel">Student Admission</h2>
+            <div id="admissionBanner" class="admission-banner">
+                <div class="admission-seal">🎓</div>
+                <h3 class="admission-title">เปิดรับสมัครนักเรียนใหม่</h3>
+                <p class="admission-subtitle">ประจำปีการศึกษา 2570</p>
+                <p style="color: var(--text-light); max-width: 600px; margin: 0 auto 2rem;">
+                    โรงเรียนรชตเปิดรับสมัครนักเรียนที่มีพลังเวทมนตร์ อายุ 16-20 ปี
+                    คลิกเพื่อดูรายละเอียดและสมัครออนไลน์
+                </p>
+                <button class="admission-cta">ดูรายละเอียด</button>
+            </div>
+        </section>
+
+        <section id="npc">
+            <h2 class="section-title cinzel">Suggested NPC</h2>
+            <div class="item-grid">
+                <div class="card">
+                    <h3 style="color: var(--gold);">The Gatekeeper Giant</h3>
+                    <p>ยักษ์ผู้เฝ้าประตูกัลยาณมิตร ทำหน้าที่คัดกรองผู้มีสิทธิ์เข้าเรียน
+                        หากตอบคำถามปริศนาไม่ได้จะถูกดีดออกจากโรงเรียนทันที</p>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Floating Rules Button -->
+    <div id="rulesButton" class="rules-fab" title="กฎระเบียบโรงเรียน"></div>
+
+    <!-- Content Modal -->
+    <div id="contentModal" class="content-modal">
+        <div class="content-modal-container">
+            <div class="content-modal-header">
+                <h2 id="contentModalTitle" class="content-modal-title"></h2>
+                <button id="contentModalClose" class="content-modal-close">&times;</button>
+            </div>
+            <div id="contentModalBody" class="content-modal-body"></div>
+        </div>
+    </div>
+
+    </div>
+
+    <!-- Student Modal -->
+    <div id="studentModal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-particles"></div>
+
+            <div class="modal-header">
+                <div class="modal-title">
+                    <img id="modalHouseIcon" src="" alt="House Badge" class="house-icon">
+                    <span id="modalHouseTitle"></span>
+                </div>
+                <button id="closeModal" class="modal-close">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Student List View -->
+                <div id="studentListView">
+                    <div class="search-section">
+                        <input type="text" id="searchBox" class="search-box"
+                            placeholder="🔍 ค้นหาด้วย ID, ชื่อ, หรือปีการศึกษา...">
+                    </div>
+
+                    <table class="student-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Year</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentTableBody">
+                            <!-- Student rows will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Student Detail View -->
+                <div id="studentDetailView" class="student-detail">
+                    <button id="backToList" class="back-button">
+                        ← กลับไปรายชื่อ
+                    </button>
+
+                    <div class="student-profile">
+                        <div>
+                            <img id="studentPhoto" src="" alt="Student Photo" class="student-photo">
+                        </div>
+
+                        <div class="student-info">
+                            <h2 id="studentName"></h2>
+                            <div id="studentIdDetail" class="student-id"></div>
+
+                            <div class="info-row">
+                                <div class="info-label">ปีการศึกษา</div>
+                                <div id="studentYear" class="info-value"></div>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="info-label">ภูมิลำเนา</div>
+                                <div id="studentHometown" class="info-value"></div>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="info-label">อาหารที่แพ้</div>
+                                <div id="studentAllergies" class="info-value"></div>
+                            </div>
+
+                            <div class="inventory-section">
+                                <h3>Inventory</h3>
+                                <div id="inventoryList" class="inventory-list">
+                                    <!-- Inventory items will be populated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('section').forEach(section => {
+            observer.observe(section);
+        });
+    </script>
+    <script src="js/school-content.js"></script>
+    <script src="js/house-roster.js"></script>
+</body>
+
+</html>

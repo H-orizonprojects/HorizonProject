@@ -1,0 +1,9 @@
+{
+    "name": "horizon-project",
+    "version": "1.0.0",
+    "description": "Magical World Project - Eternity",
+    "scripts": {
+        "encrypt": "node tools/encrypt-page.mjs winchester.html eternity && node tools/encrypt-page.mjs rachata_house.html eternity"
+    },
+    "dependencies": {}
+}
