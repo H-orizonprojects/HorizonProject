@@ -3,9 +3,20 @@
     "version": "1.0.0",
     "description": "Magical World Project - Eternity",
     "scripts": {
+        "start": "node server.js",
+        "dev": "node server.js",
         "encrypt": "node tools/encrypt-page.mjs winchester.html eternity && node tools/encrypt-page.mjs rachata_house.html eternity"
     },
     "dependencies": {
+        "cookie-parser": "^1.4.7",
+        "cors": "^2.8.6",
+        "dotenv": "^17.2.4",
+        "express": "^5.2.1",
+        "express-session": "^1.19.0",
+        "mongodb": "^7.1.0",
+        "mongoose": "^9.2.1",
+        "passport": "^0.7.0",
+        "passport-discord": "^0.1.4",
         "xlsx": "^0.18.5"
     }
 }

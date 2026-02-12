@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - Eternity</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/school-content.css">
+    <style>
+        /* Dashboard Specific Styles */
+        .dashboard-container {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            color: var(--text-light);
+        }
+
+        .user-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem;
+            border-radius: 15px;
+            border: 1px solid var(--gold);
+            margin-bottom: 2rem;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 2px solid var(--gold);
+        }
+
+        .user-info h2 {
+            margin: 0;
+            color: var(--gold);
+            font-family: 'Cinzel', serif;
+        }
+
+        .user-balance {
+            font-size: 1.5rem;
+            color: #ffd700;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-tab {
+            padding: 1rem 2rem;
+            cursor: pointer;
+            font-family: 'Cinzel', serif;
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tab:hover {
+            color: var(--text-light);
+        }
+
+        .nav-tab.active {
+            color: var(--gold);
+            border-bottom-color: var(--gold);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Shop Grid */
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .item-card {
+            background: rgba(20, 20, 20, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .item-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--gold);
+        }
+
+        .item-image {
+            width: 100%;
+            height: 150px;
+            object-fit: contain;
+            margin-bottom: 1rem;
+        }
+
+        .item-price {
+            color: #ffd700;
+            font-weight: bold;
+            margin: 0.5rem 0;
+        }
+
+        .buy-btn {
+            background: var(--gold);
+            color: black;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .buy-btn:hover {
+            background: #e6c200;
+        }
+
+        /* Crafting Interface */
+        .crafting-interface {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+        }
+
+        .recipe-list {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 1rem;
+            border-radius: 10px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .recipe-item {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .recipe-item:hover,
+        .recipe-item.active {
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .crafting-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            padding: 2rem;
+            min-height: 400px;
+        }
+
+        .cauldron {
+            width: 200px;
+            height: 200px;
+            background: url('assets/images/cauldron.png') no-repeat center;
+            background-size: contain;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        /* Bank Interface */
+        .bank-interface {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .bank-card {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            padding: 2rem;
+            border-radius: 15px;
+            border: 1px solid var(--gold);
+        }
+
+        .coin-stack {
+            font-size: 3rem;
+            color: #ffd700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            margin-bottom: 1rem;
+        }
+
+        /* Admin Controls */
+        .admin-controls {
+            display: none;
+            /* Hidden by default */
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: rgba(255, 68, 68, 0.1);
+            border: 1px solid #ff4444;
+            border-radius: 10px;
+        }
+
+        .admin-controls.visible {
+            display: block;
+        }
+
+        input,
+        select {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            border-radius: 5px;
+            width: 100%;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body style="background: #0a0a0a;">
+
+    <div class="dashboard-container">
+
+        <!-- Header -->
+        <header class="user-header">
+            <div class="user-profile">
+                <img src="" alt="Avatar" class="user-avatar" id="userAvatar">
+                <div class="user-info">
+                    <h2 id="userName">User Name</h2>
+                    <span id="userHouse" class="text-muted">House</span>
+                    <span id="userRole" class="badge">Role</span>
+                </div>
+            </div>
+            <div class="user-balance">
+                <span>🪙</span>
+                <span id="userGold">0</span> G
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav-tabs">
+            <div class="nav-tab active" onclick="switchTab('shop')">Magic Shop</div>
+            <div class="nav-tab" onclick="switchTab('craft')">Crafting Station</div>
+            <div class="nav-tab" onclick="switchTab('bank')">Gringotts Bank</div>
+            <div class="nav-tab" onclick="switchTab('inventory')">Inventory</div>
+        </nav>
+
+        <!-- Admin Panel (Conditional) -->
+        <div id="adminPanel" class="admin-controls">
+            <h3>🔨 Admin Controls</h3>
+            <button class="buy-btn" onclick="openAddItemModal()">+ Add New Item</button>
+        </div>
+
+        <!-- Shop Tab -->
+        <section id="shop" class="tab-content active">
+            <div class="shop-grid" id="shopContainer">
+                <!-- Items will be injected here -->
+            </div>
+        </section>
+
+        <!-- Craft Tab -->
+        <section id="craft" class="tab-content">
+            <div class="crafting-interface">
+                <div class="recipe-list" id="recipeList">
+                    <!-- Recipes -->
+                </div>
+                <div class="crafting-area" id="craftingArea">
+                    <div class="cauldron"></div>
+                    <h3 id="craftingTitle">Select a Recipe</h3>
+                    <div id="craftingIngredients" style="margin-bottom: 1rem;"></div>
+                    <button class="buy-btn" id="craftBtn" disabled>Craft Item</button>
+                    <div id="craftResult" style="margin-top: 1rem;"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bank Tab -->
+        <section id="bank" class="tab-content">
+            <div class="bank-interface">
+                <div class="bank-card">
+                    <h3>💰 Your Vault</h3>
+                    <div class="coin-stack">🪙 <span id="bankBalance">0</span></div>
+                    <p>Protected by Goblins & Dragon Fire</p>
+                </div>
+                <div class="bank-card">
+                    <h3>💸 Transfer Funds</h3>
+                    <input type="text" id="recipientId" placeholder="Recipient ID or Username (Exact)">
+                    <input type="number" id="transferAmount" placeholder="Amount">
+                    <button class="buy-btn" onclick="transferFunds()">Send Owls</button>
+                    <p id="transferResult" style="margin-top: 1rem;"></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Inventory Tab -->
+        <section id="inventory" class="tab-content">
+            <div class="shop-grid" id="inventoryContainer">
+                <!-- Inventory Items -->
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Modals and Scripts -->
+    <script src="js/dashboard.js"></script>
+</body>
+
+</html>

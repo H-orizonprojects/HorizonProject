@@ -191,7 +191,38 @@
         </div>
     </main>
 
+    <div id="auth-container" style="position: fixed; top: 20px; right: 20px; z-index: 1000;">
+        <a href="/auth/discord" id="login-btn" class="glass"
+            style="display: flex; align-items: center; gap: 10px; padding: 10px 20px; border-radius: 30px; color: var(--gold); text-decoration: none; border: 1px solid var(--gold); transition: all 0.3s ease;">
+            <img src="https://assets-global.website-files.com/6257adef93867e56f84d3092/636e0a6a49cf127bf92de1e2_icon_clyde_blurple_RGB.png"
+                alt="Discord" style="width: 24px; height: 24px;">
+            <span class="cinzel">Login</span>
+        </a>
+    </div>
+
     <script src="js/lock.js"></script>
+    <script>
+        // Check login status
+        fetch('/auth/me')
+            .then(response => response.json())
+            .then(data => {
+                const authContainer = document.getElementById('auth-container');
+                if (data.authenticated) {
+                    authContainer.innerHTML = `
+                        <div class="glass" style="display: flex; align-items: center; gap: 15px; padding: 10px 20px; border-radius: 30px; border: 1px solid var(--gold);">
+                            <img src="https://cdn.discordapp.com/avatars/${data.user.discordId}/${data.user.avatar}.png" alt="Avatar" style="width: 32px; height: 32px; border-radius: 50%;">
+                            <span class="cinzel" style="color: var(--gold);">${data.user.username}</span>
+                            <a href="dashboard.html" class="cinzel" style="color: var(--purple-light); text-decoration: none; margin-left: 10px; font-weight: bold;">Dashboard</a>
+                            <a href="/auth/logout" style="color: #ff4444; text-decoration: none; margin-left: 10px;">Logout</a>
+                        </div>
+                    `;
+
+                    // Store user data
+                    localStorage.setItem('currentUser', JSON.stringify(data.user));
+                }
+            })
+            .catch(err => console.error('Auth check failed:', err));
+    </script>
 </body>
 
 </html>
