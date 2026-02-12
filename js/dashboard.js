@@ -1,14 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
     checkAuth();
-    // Default tab
-    switchNav('shop');
+    switchNav('shop'); // Default view
 });
 
 let currentUser = null;
 let currentItems = [];
 let currentRecipes = [];
 
-// --- AUTH ---
+// --- AUTHENTICATION ---
 async function checkAuth() {
     try {
         const response = await fetch('/auth/me', { credentials: 'include' });
@@ -31,7 +30,6 @@ async function checkAuth() {
 
     } catch (err) {
         console.error('Auth check failed', err);
-        // window.location.href = '/'; // Temporarily disable redirect for debugging if needed
     }
 }
 
@@ -43,49 +41,63 @@ function renderUserProfile() {
     document.getElementById('userGold').textContent = currentUser.balance;
     document.getElementById('bankBalance').textContent = currentUser.balance;
 
-    // Roles
+    // Roles Display
     const roleContainer = document.getElementById('userRole');
-    roleContainer.innerHTML = currentUser.roles.map(r => `<span class="badge role-${r}">${r.toUpperCase()}</span>`).join('');
+    if (roleContainer) {
+        roleContainer.innerHTML = currentUser.roles.map(r => `<span class="badge role-${r}">${r.toUpperCase()}</span>`).join('');
+    }
+
+    updateGoldStacks(currentUser.balance);
 }
 
 function setupAdminControls() {
-    if (currentUser.roles.includes('admin') || currentUser.roles.includes('professor')) {
-        document.getElementById('adminControls').classList.remove('hidden');
+    const adminPanel = document.getElementById('adminControls');
+    if (adminPanel) {
+        if (currentUser.roles.includes('admin') || currentUser.roles.includes('professor')) {
+            adminPanel.classList.remove('hidden');
+        }
     }
 }
 
 // --- NAVIGATION ---
 window.switchNav = function (tabId) {
-    // Buttons
+    // Update active tab buttons
     document.querySelectorAll('.spell-btn').forEach(btn => {
         btn.classList.remove('active');
-        if (btn.textContent.toLowerCase().includes(tabId) ||
-            (tabId === 'shop' && btn.textContent.includes('Shop')) ||
-            (tabId === 'craft' && btn.textContent.includes('Crafting')) ||
-            (tabId === 'bank' && btn.textContent.includes('Bank')) ||
-            (tabId === 'inventory' && btn.textContent.includes('Inventory'))) {
+        const text = btn.textContent.toLowerCase();
+        if (text.includes(tabId) ||
+            (tabId === 'shop' && text.includes('shop')) ||
+            (tabId === 'craft' && text.includes('crafting')) ||
+            (tabId === 'bank' && text.includes('bank')) ||
+            (tabId === 'inventory' && text.includes('inventory'))) {
             btn.classList.add('active');
         }
     });
 
-    // Sections
+    // Switch active section
     document.querySelectorAll('.magic-section').forEach(sec => sec.classList.remove('active'));
-    document.getElementById(tabId).classList.add('active');
+    const targetSection = document.getElementById(tabId);
+    if (targetSection) targetSection.classList.add('active');
 }
 
-// --- SHOP ---
+// --- MAGIC SHOP ---
 async function fetchShopItems() {
     try {
         const response = await fetch('/api/shop/items', { credentials: 'include' });
         currentItems = await response.json();
         renderShop(currentItems);
-    } catch (err) { console.error(err); }
+    } catch (err) { console.error('Failed to fetch shop items', err); }
 }
 
 function renderShop(items) {
     const container = document.getElementById('shopContainer');
+    if (!container) return;
+
+    const isAdmin = currentUser.roles.includes('admin') || currentUser.roles.includes('professor');
+
     container.innerHTML = items.map(item => `
         <div class="magic-card item-rarity-${item.rarity || 'common'}">
+            ${isAdmin ? `<button class="delete-btn" title="Remove Item" onclick="deleteItem('${item._id}')">×</button>` : ''}
             <div class="card-image">
                 <img src="${item.image || 'assets/images/placeholder_item.png'}" alt="${item.name}">
             </div>
@@ -97,6 +109,21 @@ function renderShop(items) {
             </div>
         </div>
     `).join('');
+}
+
+window.deleteItem = async function (itemId) {
+    if (!confirm('Permanently remove this item from the market?')) return;
+    try {
+        const response = await fetch(`/api/shop/${itemId}`, {
+            method: 'DELETE',
+            credentials: 'include'
+        });
+        if (response.ok) {
+            fetchShopItems();
+        } else {
+            alert('Failed to remove item.');
+        }
+    } catch (err) { console.error('Delete error:', err); }
 }
 
 window.buyItem = async function (itemId) {
@@ -113,16 +140,22 @@ window.buyItem = async function (itemId) {
             currentUser.balance = data.balance;
             renderUserProfile();
             fetchInventory();
-            alert('Item acquired successfully!');
+            alert('Item acquired! It has been placed in your satchel.');
         } else {
             alert(data.message);
         }
     } catch (err) { alert('Transaction failed'); }
 }
 
-// --- ADMIN MODAL ---
-window.openAdminModal = () => document.getElementById('adminModal').style.display = 'block';
-window.closeAdminModal = () => document.getElementById('adminModal').style.display = 'none';
+// --- ADMIN CONTROL ---
+window.openAdminModal = () => {
+    const modal = document.getElementById('adminModal');
+    if (modal) modal.style.display = 'block';
+};
+window.closeAdminModal = () => {
+    const modal = document.getElementById('adminModal');
+    if (modal) modal.style.display = 'none';
+};
 
 window.handleAddItem = async function (e) {
     e.preventDefault();
@@ -130,8 +163,8 @@ window.handleAddItem = async function (e) {
     const itemData = {
         name: formData.get('name'),
         type: formData.get('type'),
-        price: formData.get('price'),
-        image: formData.get('image'), // In a real app, handle file upload
+        price: parseInt(formData.get('price')),
+        image: formData.get('image'),
         rarity: 'common'
     };
 
@@ -147,26 +180,30 @@ window.handleAddItem = async function (e) {
             alert('New artifact registered in the archives.');
             closeAdminModal();
             fetchShopItems();
+            e.target.reset();
         } else {
-            alert('Failed to register item.');
+            const data = await response.json();
+            alert('Failed: ' + data.message);
         }
-    } catch (err) { console.error(err); }
+    } catch (err) { console.error('Add item error:', err); }
 }
 
-// --- CRAFTING ---
+// --- CRAFTING STATION ---
 async function fetchRecipes() {
     try {
         const response = await fetch('/api/craft/recipes', { credentials: 'include' });
         currentRecipes = await response.json();
         renderRecipes(currentRecipes);
-    } catch (err) { console.error(err); }
+    } catch (err) { console.error('Failed to fetch recipes', err); }
 }
 
 function renderRecipes(recipes) {
     const list = document.getElementById('recipeList');
+    if (!list) return;
+
     list.innerHTML = recipes.map(recipe => `
         <div class="scroll-item" onclick="selectRecipe('${recipe._id}')">
-            <h4>${recipe.resultItemId?.name || 'Unknown Recipe'}</h4>
+            <h4>${recipe.resultItemId?.name || 'Ancient Formula'}</h4>
             <small>${recipe.craftingType}</small>
         </div>
     `).join('');
@@ -177,14 +214,19 @@ window.selectRecipe = function (recipeId) {
     selectedRecipe = currentRecipes.find(r => r._id === recipeId);
     if (!selectedRecipe) return;
 
+    // Highlight in list
+    document.querySelectorAll('.scroll-item').forEach(item => {
+        item.classList.toggle('active', item.onclick.toString().includes(recipeId));
+    });
+
     document.getElementById('craftingTitle').textContent = `Brewing: ${selectedRecipe.resultItemId.name}`;
 
-    // Check ingredients
+    // Ingredients check
     const container = document.getElementById('craftingIngredients');
     const userInv = currentUser.inventory || [];
 
     const ingredientsHTML = selectedRecipe.ingredients.map(ing => {
-        const userHas = userInv.find(i => i.itemId === ing.itemId._id)?.quantity || 0;
+        const userHas = userInv.find(i => i.itemId._id === ing.itemId._id || i.itemId === ing.itemId._id)?.quantity || 0;
         const hasEnough = userHas >= ing.quantity;
         return `
             <div class="ingredient-check ${hasEnough ? 'ok' : 'missing'}">
@@ -196,9 +238,9 @@ window.selectRecipe = function (recipeId) {
 
     container.innerHTML = ingredientsHTML;
 
-    // Enable button
+    // Button activation
     const canCraft = selectedRecipe.ingredients.every(ing => {
-        const userHas = userInv.find(i => i.itemId === ing.itemId._id)?.quantity || 0;
+        const userHas = userInv.find(i => i.itemId._id === ing.itemId._id || i.itemId === ing.itemId._id)?.quantity || 0;
         return userHas >= ing.quantity;
     });
 
@@ -209,8 +251,9 @@ window.selectRecipe = function (recipeId) {
 
 async function craftItem(recipeId) {
     const cauldron = document.querySelector('.cauldron-visual');
-    cauldron.classList.add('brewing'); // CSS Animation triggers
+    if (cauldron) cauldron.classList.add('brewing');
 
+    // Immersive delay
     setTimeout(async () => {
         try {
             const response = await fetch('/api/craft/craft', {
@@ -221,23 +264,23 @@ async function craftItem(recipeId) {
             });
             const data = await response.json();
 
-            cauldron.classList.remove('brewing');
+            if (cauldron) cauldron.classList.remove('brewing');
 
             if (response.ok) {
-                alert('Success! ' + data.message); // replace with nice modal later
+                alert('Success! ' + data.message);
                 fetchInventory();
-                selectRecipe(recipeId); // Refresh counts
+                if (selectedRecipe && selectedRecipe._id === recipeId) selectRecipe(recipeId);
             } else {
                 alert(data.message);
             }
         } catch (err) {
-            cauldron.classList.remove('brewing');
+            if (cauldron) cauldron.classList.remove('brewing');
             alert('The spell fizzled out...');
         }
-    }, 2000); // Fake delay for animation
+    }, 2000);
 }
 
-// --- BANK ---
+// --- GRINGOTTS BANK ---
 async function fetchBalance() {
     try {
         const response = await fetch('/api/bank/balance', { credentials: 'include' });
@@ -249,12 +292,30 @@ async function fetchBalance() {
     } catch (err) { }
 }
 
+function updateGoldStacks(balance) {
+    const container = document.querySelector('.vault-gold-pile');
+    if (!container) return;
+
+    const stackCount = 7;
+    let html = '';
+    for (let i = 0; i < stackCount; i++) {
+        const baseHeight = Math.min(balance / 50, 100);
+        const randomVar = (Math.sin(i * 1.5) + i) * 8;
+        const height = Math.max(5, baseHeight + randomVar);
+        html += `<div class="coin-stack-visual" style="height: ${height}px"></div>`;
+    }
+    container.innerHTML = html;
+}
+
 window.transferFunds = async function () {
     const recipient = document.getElementById('recipientId').value;
     const amount = document.getElementById('transferAmount').value;
-    if (!recipient || !amount) return;
+    if (!recipient || !amount) {
+        alert('Credentials and amount required.');
+        return;
+    }
 
-    if (!confirm(`Transfer ${amount} G to ${recipient}?`)) return;
+    if (!confirm(`Authorize the Goblins to transfer ${amount} G to ${recipient}?`)) return;
 
     try {
         const response = await fetch('/api/bank/transfer', {
@@ -265,32 +326,33 @@ window.transferFunds = async function () {
         });
         const data = await response.json();
         if (response.ok) {
-            alert('Goblins have secured the transfer.');
+            alert('The Goblins have moved your gold securely.');
             fetchBalance();
+            document.getElementById('transferAmount').value = '';
         } else {
             alert(data.message);
         }
-    } catch (err) { alert('Transfer failed.'); }
+    } catch (err) { alert('The transfer owl got lost.'); }
 }
 
-// --- INVENTORY ---
+// --- WIZARD INVENTORY ---
 async function fetchInventory() {
     try {
         const response = await fetch('/auth/me', { credentials: 'include' });
         const data = await response.json();
         if (data.authenticated) {
-            currentUser = data.user; // Update global user state including inventory
+            currentUser = data.user;
             const container = document.getElementById('inventoryContainer');
+            if (!container) return;
 
-            if (!currentUser.inventory.length) {
-                container.innerHTML = '<p class="empty-msg">Your satchel is empty.</p>';
+            if (!currentUser.inventory || !currentUser.inventory.length) {
+                container.innerHTML = '<p class="empty-msg">Your satchel is empty. Visit Diagon Alley to stock up.</p>';
                 return;
             }
 
             container.innerHTML = currentUser.inventory.map(slot => {
-                // Fallback if populate didn't work fully, though it should have
-                const name = slot.itemId.name || 'Unknown Item';
-                const img = slot.itemId.image || 'assets/images/placeholder_item.png';
+                const name = slot.itemId?.name || 'Ancient Artifact';
+                const img = slot.itemId?.image || 'assets/images/placeholder_item.png';
                 return `
                     <div class="inventory-slot">
                         <img src="${img}" alt="${name}">
@@ -300,5 +362,5 @@ async function fetchInventory() {
                  `;
             }).join('');
         }
-    } catch (err) { }
+    } catch (err) { console.error('Inventory fetch failed', err); }
 }

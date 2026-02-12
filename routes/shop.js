@@ -70,4 +70,14 @@ router.post('/add', isAuthenticated, async (req, res) => {
     }
 });
 
+// Delete item (Admin only)
+router.delete('/:id', isAuthenticated, hasRole(['admin', 'professor']), async (req, res) => {
+    try {
+        await Item.findByIdAndDelete(req.params.id);
+        res.json({ message: 'Item removed from archives.' });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
 module.exports = router;

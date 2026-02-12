@@ -20,15 +20,22 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+const MongoStore = require('connect-mongo');
+
 // Session Setup
 app.use(session({
     secret: process.env.SESSION_SECRET || 'secret',
     resave: false,
     saveUninitialized: false,
+    store: MongoStore.create({
+        mongoUrl: process.env.MONGODB_URI,
+        collectionName: 'sessions',
+        ttl: 14 * 24 * 60 * 60 // 14 days
+    }),
     cookie: {
         secure: process.env.NODE_ENV === 'production', // True on Vercel
-        sameSite: 'none', // Needed for cross-site iframes/redirects sometimes, but 'lax' is default. 'none' requires secure:true
-        maxAge: 24 * 60 * 60 * 1000
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        maxAge: 14 * 24 * 60 * 60 * 1000 // 14 days
     }
 }));
 

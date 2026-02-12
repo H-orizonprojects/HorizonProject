@@ -142,6 +142,26 @@ body {
     border-color: var(--gold);
 }
 
+.delete-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 0, 0, 0.2);
+    border: 1px solid #ff4444;
+    color: #ff4444;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 5;
+    transition: 0.3s;
+}
+
+.delete-btn:hover {
+    background: #ff4444;
+    color: white;
+}
+
 .card-image {
     height: 180px;
     padding: 1rem;
@@ -398,6 +418,37 @@ body {
 }
 
 /* Ingredient Status */
+.vault-gold-pile {
+    height: 100px;
+    width: 200px;
+    margin: 0 auto;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 5px;
+}
+
+.coin-stack-visual {
+    width: 30px;
+    background: linear-gradient(to top, var(--gold-dark), var(--gold));
+    border: 1px solid rgba(0, 0, 0, 0.5);
+    border-radius: 3px 3px 0 0;
+    transition: height 1s ease-out;
+    position: relative;
+}
+
+.coin-stack-visual::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+}
+
 .ingredient-check {
     display: flex;
     justify-content: space-between;
