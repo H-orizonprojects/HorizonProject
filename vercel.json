@@ -1,9 +1,9 @@
 {
+  "version": 2,
   "rewrites": [
-    { "source": "/winchester", "destination": "/winchester.html" },
-    { "source": "/rachata", "destination": "/rachata_house.html" },
-    { "source": "/school", "destination": "/rachata_school.html" },
-    { "source": "/thailand", "destination": "/world_thailand.html" }
-  ],
-  "cleanUrls": true
+    {
+      "source": "/(.*)",
+      "destination": "/server.js"
+    }
+  ]
 }

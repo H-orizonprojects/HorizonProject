@@ -12,6 +12,9 @@ require('./config/passport');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Trust Proxy for Vercel
+app.set('trust proxy', 1);
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -22,7 +25,11 @@ app.use(session({
     secret: process.env.SESSION_SECRET || 'secret',
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false } // Set to true if using HTTPS
+    cookie: {
+        secure: process.env.NODE_ENV === 'production', // True on Vercel
+        sameSite: 'none', // Needed for cross-site iframes/redirects sometimes, but 'lax' is default. 'none' requires secure:true
+        maxAge: 24 * 60 * 60 * 1000
+    }
 }));
 
 // Passport Middleware
@@ -55,6 +62,10 @@ app.get('/', (req, res) => {
 });
 
 // Start Server
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-});
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`Server running on http://localhost:${PORT}`);
+    });
+}
+
+module.exports = app;
