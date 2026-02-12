@@ -5,9 +5,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rachata School of Wizardry | Eternity</title>
+    <link rel="icon" type="image/png" href="assets\images\RCT.png">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/house-modal.css">
     <link rel="stylesheet" href="css/school-content.css">
+
+    <!-- Floating Content Management -->
+    <div class="fab-container">
+        <div id="councilFab" class="council-fab" title="แผนผังสภานักเรียน"></div>
+        <div id="worldFab" class="world-fab" title="คู่มือโลกเวทมนตร์ไทย"></div>
+        <div id="rulesFab" class="rules-fab" title="กฎระเบียบโรงเรียน"></div>
+    </div>
     <style>
         .hero {
             height: 60vh;
@@ -416,7 +424,7 @@
         </section>
 
         <section id="textbooks">
-            <h2 class="section-title cinzel">📖 หนังสือเรียน</h2>
+            <h2 class="section-title cinzel">Books</h2>
             <p style="text-align: center; color: var(--text-light); margin-bottom: 2rem;">
                 ตำราเรียนเวทมนตร์แต่ละชั้นปี — คลิกเพื่อเปิดอ่านออนไลน์
             </p>
@@ -435,17 +443,23 @@
             <div class="textbook-panel active" id="textbook-year-1">
                 <div class="textbook-grid">
                     <a href="https://online.fliphtml5.com/vsduq/xaby/" target="_blank" class="textbook-card">
-                        <div class="textbook-icon">📜</div>
+                        <div class="textbook-icon">
+                            <img src="assets\icon\Card Tempest (1).png" alt="icon">
+                        </div>
                         <div class="textbook-name">วิชาประวัติศาสตร์เวทมนตร์</div>
                         <div class="textbook-status available">เปิดอ่าน →</div>
                     </a>
                     <a href="https://online.fliphtml5.com/vsduq/iule/" target="_blank" class="textbook-card">
-                        <div class="textbook-icon">⚗️</div>
+                        <div class="textbook-icon">
+                            <img src="assets\icon\Card Tempest (1).png" alt="icon">
+                        </div>
                         <div class="textbook-name">วิชาปรุงยา</div>
                         <div class="textbook-status available">เปิดอ่าน →</div>
                     </a>
                     <a href="https://online.fliphtml5.com/vsduq/muke/" target="_blank" class="textbook-card">
-                        <div class="textbook-icon">✨</div>
+                        <div class="textbook-icon">
+                            <img src="assets\icon\Card Tempest (1).png" alt="icon">
+                        </div>
                         <div class="textbook-name">วิชาคาถา</div>
                         <div class="textbook-status available">เปิดอ่าน →</div>
                     </a>
@@ -455,13 +469,18 @@
             <!-- Year 2 -->
             <div class="textbook-panel" id="textbook-year-2">
                 <div class="textbook-grid">
-                    <div class="textbook-card locked">
-                        <div class="textbook-icon">🐲</div>
+                    <a href="https://online.fliphtml5.com/vsduq/csqr/?fbclid=PAQ0xDSwL7z5ZleHRuA2FlbQIxMAABp5QyMJdYD2jXBKKyqpSqOV9Z8VYhmvHfq8mwREDPtpaai5pqyWfFOmkFQCf6_aem_xW-c2ZzSdop0ewSavLQPEQ%23p%3D23"
+                        target="_blank" class="textbook-card">
+                        <div class="textbook-icon">
+                            <img src="assets\icon\Card Tempest (1).png" alt="icon">
+                        </div>
                         <div class="textbook-name">วิชาดูแลสัตว์วิเศษ</div>
-                        <div class="textbook-status upcoming">🔒 เร็วๆ นี้</div>
-                    </div>
+                        <div class="textbook-status available">เปิดอ่าน →</div>
+                    </a>
                     <a href="https://online.fliphtml5.com/vsduq/lbzz/" target="_blank" class="textbook-card">
-                        <div class="textbook-icon">🌟</div>
+                        <div class="textbook-icon">
+                            <img src="assets\icon\Card Tempest (1).png" alt="icon">
+                        </div>
                         <div class="textbook-name">วิชาดาราศาสตร์</div>
                         <div class="textbook-status available">เปิดอ่าน →</div>
                     </a>
@@ -472,12 +491,16 @@
             <div class="textbook-panel" id="textbook-year-3">
                 <div class="textbook-grid">
                     <a href="https://online.fliphtml5.com/vsduq/opvp/" target="_blank" class="textbook-card">
-                        <div class="textbook-icon">🌿</div>
+                        <div class="textbook-icon">
+                            <img src="assets\icon\Card Tempest (1).png" alt="icon">
+                        </div>
                         <div class="textbook-name">วิชาสมุนไพรศาสตร์</div>
                         <div class="textbook-status available">เปิดอ่าน →</div>
                     </a>
                     <div class="textbook-card locked">
-                        <div class="textbook-icon">🛡️</div>
+                        <div class="textbook-icon">
+                            <img src="assets\icon\Card Tempest (1).png" alt="icon">
+                        </div>
                         <div class="textbook-name">วิชาอเวทย์ศึกษา</div>
                         <div class="textbook-status upcoming">⏳ กำลังจัดทำ</div>
                     </div>
@@ -488,12 +511,16 @@
             <div class="textbook-panel" id="textbook-year-4">
                 <div class="textbook-grid">
                     <a href="https://online.fliphtml5.com/vsduq/avqg/" target="_blank" class="textbook-card">
-                        <div class="textbook-icon">🦎</div>
+                        <div class="textbook-icon">
+                            <img src="assets\icon\Card Tempest (1).png" alt="icon">
+                        </div>
                         <div class="textbook-name">วิชาแปลงร่าง</div>
                         <div class="textbook-status available">เปิดอ่าน →</div>
                     </a>
                     <a href="https://online.fliphtml5.com/vsduq/gejy/" target="_blank" class="textbook-card">
-                        <div class="textbook-icon">🔮</div>
+                        <div class="textbook-icon">
+                            <img src="assets\icon\Card Tempest (1).png" alt="icon">
+                        </div>
                         <div class="textbook-name">วิชาพยากรณ์ศาสตร์</div>
                         <div class="textbook-status available">เปิดอ่าน →</div>
                     </a>
@@ -504,7 +531,9 @@
             <div class="textbook-panel" id="textbook-year-5">
                 <div class="textbook-grid">
                     <a href="https://online.fliphtml5.com/vsduq/nrqp/" target="_blank" class="textbook-card">
-                        <div class="textbook-icon">⚔️</div>
+                        <div class="textbook-icon">
+                            <img src="assets\icon\Card Tempest (1).png" alt="icon">
+                        </div>
                         <div class="textbook-name">วิชาป้องกันตัวจากศาสตร์มืด</div>
                         <div class="textbook-status available">เปิดอ่าน →</div>
                     </a>
@@ -516,7 +545,9 @@
                 <div class="textbook-grid">
                     <a href="https://docs.google.com/document/d/1UkmXsLoiKgJpyf_c04I9ElkSk9QFyAmo1mSeESzf2S0/edit"
                         target="_blank" class="textbook-card">
-                        <div class="textbook-icon">📋</div>
+                        <div class="textbook-icon">
+                            <img src="assets\icon\Card Tempest (1).png" alt="icon">
+                        </div>
                         <div class="textbook-name">วิชาปรุงยาเพิ่มเติม</div>
                         <div class="textbook-status available">เปิดอ่าน →</div>
                     </a>
@@ -680,33 +711,27 @@
             <div class="chapter-container">
                 <div class="chapter-book">
                     <div class="chapter-number">Chapter I</div>
-                    <h3 class="chapter-title">การมาถึงของนักเรียนใหม่</h3>
-                    <p class="chapter-preview">
-                        เรื่องราวเริ่มต้นเมื่อนักเรียนชั้นปีที่หนึ่งเดินทางมาถึงโรงเรียนรชตเป็นครั้งแรก...</p>
+                    <h3 class="chapter-title">Beginning (จุดเริ่มต้น)</h3>
+                    <p class="chapter-preview">ต้นกำเนิดของตระกูลรชตจากกรีซสู่แผ่นดินไทย
+                        และการเปลี่ยนผ่านจากธุรกิจเครื่องเทศสู่สถาบันการศึกษาดั่งทองคำ...</p>
                 </div>
                 <div class="chapter-book">
                     <div class="chapter-number">Chapter II</div>
-                    <h3 class="chapter-title">พิธีคัดเลือกเข้าบ้าน</h3>
-                    <p class="chapter-preview">ช่วงเวลาอันสำคัญที่จะกำหนดชะตากรรมของนักเรียนแต่ละคนว่าจะอยู่บ้านใด...
-                    </p>
+                    <h3 class="chapter-title">Mystery of The Lost Book</h3>
+                    <p class="chapter-preview">ช่วงเวลาที่หายไปในปี พ.ศ. 1498
+                        การก้าวขึ้นสู่อำนาจของรัฐมนตรีชวัลภาสและการทรยศที่เปลี่ยนโฉมหน้าประวัติศาสตร์...</p>
                 </div>
                 <div class="chapter-book">
                     <div class="chapter-number">Chapter III</div>
-                    <h3 class="chapter-title">บทเรียนแรก</h3>
-                    <p class="chapter-preview">วันแรกของการเรียนการสอน
-                        นักเรียนได้สัมผัสกับมนต์เสน่ห์ของเวทมนตร์ศาสตร์...</p>
+                    <h3 class="chapter-title">Tales from Cursed Ancestry</h3>
+                    <p class="chapter-preview">ความลับปี 2509 เมื่อศาสตราจารย์ใหญ่คำผานถูกลวงให้ทำลายข้อมูล
+                        และการแทรกแซงจากกระทรวงที่นำไปสู่โศกนาฏกรรม...</p>
                 </div>
                 <div class="chapter-book">
-                    <div class="chapter-number">Chapter IV</div>
-                    <h3 class="chapter-title">ความลับในห้องสมุด</h3>
-                    <p class="chapter-preview">การค้นพบห้องลับในห้องสมุดวินเชสเตอร์ที่เก็บงานเขียนโบราณอันน่าพิศวง...
-                    </p>
-                </div>
-                <div class="chapter-book">
-                    <div class="chapter-number">Chapter V</div>
-                    <h3 class="chapter-title">การผจญภัยในป่าหิมพานต์</h3>
-                    <p class="chapter-preview">เมื่อนักเรียนหลงเข้าไปในป่าหิมพานต์ที่เปลี่ยนแปลงอยู่เสมอ
-                        พวกเขาต้องเผชิญกับอันตราย...</p>
+                    <div class="chapter-number">Final Chapter IV</div>
+                    <h3 class="chapter-title">Fate's Cruel Embrace</h3>
+                    <p class="chapter-preview">สายเลือดวินเชสเตอร์ผู้บูชาเทพีแห่งเวทมนตร์
+                        การล่มสลายและการเกิดใหม่ภายใต้นาม "รชต" ในดินแดนเอเชีย...</p>
                 </div>
             </div>
         </section>
@@ -735,6 +760,7 @@
                 </div>
             </div>
         </section>
+
 
     </div>
 

@@ -5,5 +5,7 @@
     "scripts": {
         "encrypt": "node tools/encrypt-page.mjs winchester.html eternity && node tools/encrypt-page.mjs rachata_house.html eternity"
     },
-    "dependencies": {}
+    "dependencies": {
+        "xlsx": "^0.18.5"
+    }
 }

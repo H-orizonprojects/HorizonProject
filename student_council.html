@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Council | Eternity</title>
+    <link rel="icon" type="image/png" href="assets\images\Eternal.png">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/school-content.css">
+    <style>
+        .hero {
+            height: 40vh;
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.9)), url('assets/images/council_hero.png');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            border-bottom: 3px solid var(--purple-light);
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            color: var(--gold);
+            text-shadow: 0 0 20px rgba(138, 43, 226, 0.5);
+        }
+
+        .council-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 1rem;
+        }
+
+        /* Org Chart Styling */
+        .org-chart {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3rem;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .node-level {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            width: 100%;
+        }
+
+        .node {
+            background: rgba(20, 10, 40, 0.85);
+            border: 2px solid var(--gold);
+            border-radius: 15px;
+            padding: 1.5rem;
+            width: 260px;
+            text-align: center;
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+            cursor: pointer;
+        }
+
+        .node:hover {
+            transform: translateY(-10px) scale(1.05);
+            border-color: var(--purple-light);
+            box-shadow: 0 15px 40px rgba(138, 43, 226, 0.4);
+            z-index: 10;
+        }
+
+        .node-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--gold), var(--purple-light));
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            border: 2px solid #fff;
+        }
+
+        .node-role {
+            font-family: 'Cinzel', serif;
+            color: var(--gold);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        .node-name {
+            font-size: 1.2rem;
+            color: #fff;
+            margin-bottom: 0.3rem;
+        }
+
+        .node-details {
+            font-size: 0.8rem;
+            color: var(--purple-light);
+            font-style: italic;
+        }
+
+        /* Connections */
+        .connector-v {
+            width: 2px;
+            height: 3rem;
+            background: linear-gradient(to bottom, var(--gold), var(--purple-light));
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        .nav-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--gold);
+            text-decoration: none;
+        }
+
+        .back-btn {
+            color: var(--gold);
+            text-decoration: none;
+            font-family: 'Cinzel', serif;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav>
+        <a href="index.html" class="nav-brand cinzel">ETERNITY</a>
+        <a href="rachata_school.html" class="back-btn">← Back to School</a>
+    </nav>
+
+    <header class="hero">
+        <h1 class="cinzel">Student Council</h1>
+        <p class="cinzel" style="color: var(--purple-light);">คณะกรรมการสภานักเรียนโรงเรียนรชต</p>
+    </header>
+
+    <div class="council-container">
+        <div class="org-chart">
+            <!-- Level 1: President -->
+            <div class="node-level">
+                <div class="node">
+                    <div class="node-avatar">👑</div>
+                    <div class="node-role">President</div>
+                    <div class="node-name">รอข้อมูลรายชื่อ</div>
+                    <div class="node-details">ประธานนักเรียน</div>
+                </div>
+            </div>
+
+            <div class="connector-v"></div>
+
+            <!-- Level 2: Vice Presidents -->
+            <div class="node-level">
+                <div class="node">
+                    <div class="node-avatar">🏛️</div>
+                    <div class="node-role">Vice President</div>
+                    <div class="node-name">รอข้อมูลรายชื่อ</div>
+                    <div class="node-details">รองประธาน (ฝ่ายวิชาการ)</div>
+                </div>
+                <div class="node">
+                    <div class="node-avatar">🛡️</div>
+                    <div class="node-role">Vice President</div>
+                    <div class="node-name">รอข้อมูลรายชื่อ</div>
+                    <div class="node-details">รองประธาน (ฝ่ายปกครอง)</div>
+                </div>
+            </div>
+
+            <div class="connector-v"></div>
+
+            <!-- Level 3: Executives -->
+            <div class="node-level" style="gap: 1.5rem;">
+                <div class="node" style="width: 220px;">
+                    <div class="node-avatar">📜</div>
+                    <div class="node-role">Secretary</div>
+                    <div class="node-name">รอข้อมูลรายชื่อ</div>
+                </div>
+                <div class="node" style="width: 220px;">
+                    <div class="node-avatar">💰</div>
+                    <div class="node-role">Treasurer</div>
+                    <div class="node-name">รอข้อมูลรายชื่อ</div>
+                </div>
+                <div class="node" style="width: 220px;">
+                    <div class="node-avatar">📢</div>
+                    <div class="node-role">PR</div>
+                    <div class="node-name">รอข้อมูลรายชื่อ</div>
+                </div>
+                <div class="node" style="width: 220px;">
+                    <div class="node-avatar">🎭</div>
+                    <div class="node-role">Activities</div>
+                    <div class="node-name">รอข้อมูลรายชื่อ</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

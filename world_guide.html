@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World Thailand Guide | Eternity</title>
+    <link rel="icon" type="image/png" href="assets\images\Eternal.png">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/school-content.css">
+    <style>
+        .hero {
+            height: 50vh;
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.9)), url('assets/images/world_thai_hero.png');
+            /* Placeholder if needed */
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            border-bottom: 3px solid var(--gold);
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            color: var(--gold);
+            text-shadow: 0 0 20px var(--gold-glow);
+            margin-bottom: 1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 1.5rem;
+        }
+
+        section {
+            margin-bottom: 8rem;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 1s ease;
+        }
+
+        section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            color: var(--gold);
+            margin-bottom: 3rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .section-title::after {
+            content: '';
+            flex-grow: 1;
+            height: 1px;
+            background: linear-gradient(to right, var(--gold), transparent);
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .nav-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--gold);
+            text-decoration: none;
+        }
+
+        .back-btn {
+            color: var(--gold);
+            text-decoration: none;
+            font-family: 'Cinzel', serif;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            color: #fff;
+            transform: translateX(-5px);
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav>
+        <a href="index.html" class="nav-brand cinzel">ETERNITY</a>
+        <a href="rachata_school.html" class="back-btn">← Back to School</a>
+    </nav>
+
+    <header class="hero">
+        <div class="world-intro-icon" style="font-size: 6rem; margin-bottom: 1rem;">🇹🇭</div>
+        <h1 class="cinzel text-glow">World : Thailand</h1>
+        <p class="cinzel" style="color: var(--purple-light); font-size: 1.2rem; letter-spacing: 2px;">
+            สารานุกรมโลกเวทมนตร์แห่งประเทศไทย</p>
+    </header>
+
+    <div class="container">
+        <!-- 1. Intro -->
+        <div class="world-intro-banner">
+            <p class="world-intro-text">
+                ประเทศไทยเป็นหนึ่งในดินแดนที่มีประวัติศาสตร์เวทมนตร์ยาวนานที่สุดในเอเชีย
+                ตั้งแต่ยุคสุโขทัยจนถึงปัจจุบัน ชุมชนผู้วิเศษของไทยดำรงอยู่คู่ขนานกับโลกปกติ
+                โดยมีระบบปกครอง สถาบันการศึกษา และวัฒนธรรมเวทมนตร์ที่เป็นเอกลักษณ์
+                ผสมผสานไสยศาสตร์โบราณกับวิชาเวทมนตร์สากล
+            </p>
+        </div>
+
+        <!-- 2. History -->
+        <section id="history">
+            <h2 class="section-title cinzel">⚡ ประวัติศาสตร์เวทมนตร์ไทย</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-era">ยุคสุโขทัย</div>
+                    <div class="timeline-year">พ.ศ. 1792 - 1981</div>
+                    <p class="timeline-desc">
+                        การค้นพบพลังเวทมนตร์จากพระไตรปิฎกมหัศจรรย์ครั้งแรกในสุโขทัย
+                        พ่อขุนรามคำแหงทรงส่งคณะพ่อมดไปศึกษาเวทมนตร์ที่ลังกา
+                        เกิดโรงเรียนสอนเวทมนตร์แห่งแรกที่อรัญญิก
+                        มีการจดบันทึกคาถาเป็นลายสือไทยครั้งแรก
+                    </p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-era">ยุคอยุธยา</div>
+                    <div class="timeline-year">พ.ศ. 1893 - 2310</div>
+                    <p class="timeline-desc">
+                        ยุคทองของพ่อมดนักรบ พระนเรศวรใช้เวทมนตร์ในการกอบกู้แผ่นดิน
+                        เวทมนตร์ไทยผสมผสานกับอิทธิพลจากจีน อินเดีย เปอร์เซีย
+                        เกิด "สงครามเวทย์มนต์ใต้ดิน" ระหว่างฝ่ายเวทมนตร์ขาวกับเวทมนตร์มืด
+                        ก่อตั้งธนาคารนาคราชแห่งแรกริมแม่น้ำเจ้าพระยา
+                    </p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-era">ยุครัตนโกสินทร์ตอนต้น</div>
+                    <div class="timeline-year">พ.ศ. 2325 - 2475</div>
+                    <p class="timeline-desc">
+                        พระราชบัญญัติแยกโลกเวทมนตร์จากโลกมนุษย์อย่างเป็นทางการ
+                        ก่อตั้งกระทรวงเวทมนตร์แห่งประเทศไทยโดยสมบูรณ์
+                        สร้างระบบซ่อนตัวและคาถากันสายตาทั่วประเทศ
+                        เริ่มใช้สกุลเงิน "บาทมนตรา" แยกจากเงินสามัญ
+                    </p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-era">ยุคปัจจุบัน</div>
+                    <div class="timeline-year">พ.ศ. 2475 - ปัจจุบัน</div>
+                    <p class="timeline-desc">
+                        เปิดโรงเรียนรชตเป็นโรงเรียนเวทมนตร์หลักประจำชาติ
+                        ร่วมก่อตั้งสมาพันธ์เวทมนตร์อาเซียน
+                        ปัจจุบันมีประชากรผู้วิเศษราว 120,000 คนทั่วประเทศ
+                        กระทรวงเวทมนตร์ทำงานร่วมกับ International Confederation of Wizards
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. Magical Places -->
+        <section id="places">
+            <h2 class="section-title cinzel">🏛️ สถานที่สำคัญ</h2>
+            <div class="places-grid">
+                <div class="place-card">
+                    <div class="place-icon">🏪</div>
+                    <h3 class="place-name">ตรอกเสน่ห์</h3>
+                    <p class="place-name-en">Sanen Alley</p>
+                    <span class="place-tag">ย่านการค้า</span>
+                </div>
+                <div class="place-card">
+                    <div class="place-icon">🏛️</div>
+                    <h3 class="place-name">กระทรวงเวทมนตร์</h3>
+                    <p class="place-name-en">Ministry of Magic</p>
+                    <span class="place-tag">หน่วยงานรัฐ</span>
+                </div>
+                <div class="place-card">
+                    <div class="place-icon">🌳</div>
+                    <h3 class="place-name">ป่าหิมพานต์</h3>
+                    <p class="place-name-en">Himaphan Forest</p>
+                    <span class="place-tag">เขตป่าวิเศษ</span>
+                </div>
+                <div class="place-card">
+                    <div class="place-icon">🛶</div>
+                    <h3 class="place-name">ตลาดน้ำมนตรา</h3>
+                    <p class="place-name-en">Moonlight Market</p>
+                    <span class="place-tag">ตลาด</span>
+                </div>
+                <div class="place-card">
+                    <div class="place-icon">⛩️</div>
+                    <h3 class="place-name">สุสานครุฑทอง</h3>
+                    <p class="place-name-en">Garuda Sanctuary</p>
+                    <span class="place-tag">สถานที่ศักดิ์สิทธิ์</span>
+                </div>
+                <div class="place-card">
+                    <div class="place-icon">🏥</div>
+                    <h3 class="place-name">โรงพยาบาลสิริมงคล</h3>
+                    <p class="place-name-en">Sirimongkol Hospital</p>
+                    <span class="place-tag">โรงพยาบาล</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. Banking -->
+        <section id="banking">
+            <h2 class="section-title cinzel">🏦 ธนาคารนาคราช</h2>
+            <div class="bank-card">
+                <div class="bank-header">
+                    <div class="bank-logo">🐉</div>
+                    <div>
+                        <h3 class="bank-name">ธนาคารนาคราช (Nakaraj Bank)</h3>
+                        <p class="bank-subtitle">ระบบเศรษฐกิจและเงินตราเวทมนตร์ไทย</p>
+                    </div>
+                </div>
+                <table class="currency-table">
+                    <thead>
+                        <tr>
+                            <th>สกุลเงิน</th>
+                            <th>เทียบเท่า</th>
+                            <th>วัสดุ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>บาทราชสีห์ (Lion)</td>
+                            <td>17 สลึงครุฑ</td>
+                            <td>ทองคำ</td>
+                        </tr>
+                        <tr>
+                            <td>สลึงครุฑ (Garuda)</td>
+                            <td>29 อัฐนาค</td>
+                            <td>เงินบริสุทธิ์</td>
+                        </tr>
+                        <tr>
+                            <td>อัฐนาค (Serpent)</td>
+                            <td>หน่วยพื้นฐาน</td>
+                            <td>ทองแดง</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 5. Knowledge -->
+        <section id="knowledge">
+            <h2 class="section-title cinzel">📚 ศาสตร์วิชาแขนงต่างๆ</h2>
+            <div class="knowledge-grid">
+                <div class="knowledge-card">
+                    <div class="knowledge-icon">🔮</div>
+                    <h3 class="knowledge-title">ไสยศาสตร์ประยุกต์</h3>
+                    <p class="knowledge-desc">การลงยันต์ การทำเครื่องราง และพิธีกรรมโบราณ</p>
+                </div>
+                <div class="knowledge-card">
+                    <div class="knowledge-icon">📜</div>
+                    <h3 class="knowledge-title">คาถาโบราณ</h3>
+                    <p class="knowledge-desc">ศึกษาเวทมนตร์จากภาษาบาลี-สันสกฤต</p>
+                </div>
+                <div class="knowledge-card">
+                    <div class="knowledge-icon">🐲</div>
+                    <h3 class="knowledge-title">สัตว์หิมพานต์วิทยา</h3>
+                    <p class="knowledge-desc">การดูแลและใช้ประโยชน์จากสัตว์วิเศษ</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. Creatures -->
+        <section id="creatures">
+            <h2 class="section-title cinzel">🐉 สัตว์วิเศษและสิ่งมีชีวิต</h2>
+            <div class="creature-grid">
+                <div class="creature-card">
+                    <div class="creature-emoji">🐉</div>
+                    <h3 class="creature-name">พญานาค</h3>
+                </div>
+                <div class="creature-card">
+                    <div class="creature-emoji">🦅</div>
+                    <h3 class="creature-name">พญาครุฑ</h3>
+                </div>
+                <div class="creature-card">
+                    <div class="creature-emoji">🦄</div>
+                    <h3 class="creature-name">กิเลน</h3>
+                </div>
+                <div class="creature-card">
+                    <div class="creature-emoji">🐘</div>
+                    <h3 class="creature-name">เอราวัณ</h3>
+                </div>
+                <div class="creature-card">
+                    <div class="creature-emoji">🦢</div>
+                    <h3 class="creature-name">หงส์</h3>
+                </div>
+                <div class="creature-card">
+                    <div class="creature-emoji">🦁</div>
+                    <h3 class="creature-name">สิงห์</h3>
+                </div>
+                <div class="creature-card">
+                    <div class="creature-emoji">🧚</div>
+                    <h3 class="creature-name">กินรี</h3>
+                </div>
+                <div class="creature-card">
+                    <div class="creature-emoji">🐊</div>
+                    <h3 class="creature-name">มกร</h3>
+                </div>
+                <div class="creature-card">
+                    <div class="creature-emoji">🦚</div>
+                    <h3 class="creature-name">นกหัสดีลิงค์</h3>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. Laws -->
+        <section id="laws">
+            <h2 class="section-title cinzel">🗺️ ขอบเขตและการดำรงอยู่</h2>
+            <div class="laws-container">
+                <div class="law-card">
+                    <h3 class="law-title">พระราชบัญญัติความลับเวทมนตร์</h3>
+                    <p class="law-desc">กฎหมายห้ามเปิดเผยการมีอยู่ของโลกเวทมนตร์แก่มักเกิล</p>
+                </div>
+                <div class="law-card">
+                    <h3 class="law-title">สนธิสัญญาเวทมนตร์อาเซียน</h3>
+                    <p class="law-desc">ความร่วมมือระหว่างกระทรวงเวทมนตร์ 10 ชาติในภูมิภาค</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Modal for details -->
+    <div id="contentModal" class="content-modal">
+        <div class="content-modal-container">
+            <div class="content-modal-header">
+                <h2 id="contentModalTitle" class="content-modal-title">Details</h2>
+                <button class="content-modal-close" id="contentModalClose">&times;</button>
+            </div>
+            <div id="contentModalBody" class="content-modal-body">
+                <!-- Content injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <script src="js/school-content.js"></script>
+    <script>
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('section').forEach(section => {
+            observer.observe(section);
+        });
+
+        // Close modal setup
+        const modal = document.getElementById('contentModal');
+        const closeBtn = document.getElementById('contentModalClose');
+        if (closeBtn) closeBtn.onclick = () => {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        };
+    </script>
+</body>
+
+</html>
