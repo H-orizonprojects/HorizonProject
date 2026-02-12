@@ -1,15 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
     checkAuth();
-    setupTabs();
+    // Default tab
+    switchNav('shop');
 });
 
 let currentUser = null;
 let currentItems = [];
 let currentRecipes = [];
 
+// --- AUTH ---
 async function checkAuth() {
     try {
-        const response = await fetch('/auth/me');
+        const response = await fetch('/auth/me', { credentials: 'include' });
         const data = await response.json();
 
         if (!data.authenticated) {
@@ -19,217 +21,185 @@ async function checkAuth() {
 
         currentUser = data.user;
         renderUserProfile();
+        setupAdminControls();
 
         // Initial Data Fetch
         fetchShopItems();
         fetchInventory();
         fetchRecipes();
-
-        // Admin Check
-        if (currentUser.roles.includes('admin') || currentUser.roles.includes('professor')) { // Adjust role check as needed
-            document.getElementById('adminPanel').classList.add('visible');
-        }
+        fetchBalance();
 
     } catch (err) {
         console.error('Auth check failed', err);
-        window.location.href = '/';
+        // window.location.href = '/'; // Temporarily disable redirect for debugging if needed
     }
 }
 
 function renderUserProfile() {
     document.getElementById('userName').textContent = currentUser.username;
-    document.getElementById('userAvatar').src = `https://cdn.discordapp.com/avatars/${currentUser.discordId}/${currentUser.avatar}.png`;
+    if (currentUser.avatar) {
+        document.getElementById('userAvatar').src = `https://cdn.discordapp.com/avatars/${currentUser.discordId}/${currentUser.avatar}.png`;
+    }
     document.getElementById('userGold').textContent = currentUser.balance;
     document.getElementById('bankBalance').textContent = currentUser.balance;
-    document.getElementById('userRole').textContent = currentUser.roles.join(', ');
+
+    // Roles
+    const roleContainer = document.getElementById('userRole');
+    roleContainer.innerHTML = currentUser.roles.map(r => `<span class="badge role-${r}">${r.toUpperCase()}</span>`).join('');
 }
 
-function setupTabs() {
-    const tabs = document.querySelectorAll('.nav-tab');
-    const contents = document.querySelectorAll('.tab-content');
-
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            tabs.forEach(t => t.classList.remove('active'));
-            contents.forEach(c => c.classList.remove('active'));
-
-            tab.classList.add('active');
-            // 'this' doesn't work well in arrow functions if relying on caller, but here we use 'tab'
-            // logic in HTML onclick="switchTab" might conflict if we verify listener here.
-            // keeping the HTML onclick approach for simplicity or removing it.
-            // Let's use the HTML onclick approach defined in HTML for switching, 
-            // but ensure the function is global.
-        });
-    });
+function setupAdminControls() {
+    if (currentUser.roles.includes('admin') || currentUser.roles.includes('professor')) {
+        document.getElementById('adminControls').classList.remove('hidden');
+    }
 }
 
-// Global scope for HTML onclicks
-window.switchTab = function (tabName) {
-    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-
-    // Find tab by text content or index? HTML has onclick, so we need to match
-    // Actually simpler to just rely on the onclick logic entirely or event listener.
-    // The HTML has onclick="switchTab('shop')", so we just need this function.
-
-    // Add active to the clicked tab... wait, I need to know WHICH tab button was clicked
-    // The visual update might be easier if I pass 'event' or just re-select based on text
-    // Simpler: Just update content. Visual tab active state needs manual update if using onclick
-
-    // Better: Select by text?
-    const tabs = document.querySelectorAll('.nav-tab');
-    tabs.forEach(t => {
-        if (t.innerText.toLowerCase().includes(tabName) ||
-            (tabName === 'craft' && t.innerText.includes('Crafting')) ||
-            (tabName === 'bank' && t.innerText.includes('Bank')) ||
-            (tabName === 'inventory' && t.innerText.includes('Inventory'))) {
-            t.classList.add('active');
+// --- NAVIGATION ---
+window.switchNav = function (tabId) {
+    // Buttons
+    document.querySelectorAll('.spell-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.textContent.toLowerCase().includes(tabId) ||
+            (tabId === 'shop' && btn.textContent.includes('Shop')) ||
+            (tabId === 'craft' && btn.textContent.includes('Crafting')) ||
+            (tabId === 'bank' && btn.textContent.includes('Bank')) ||
+            (tabId === 'inventory' && btn.textContent.includes('Inventory'))) {
+            btn.classList.add('active');
         }
     });
 
-    document.getElementById(tabName).classList.add('active');
-
-    // Refresh data on tab switch
-    if (tabName === 'inventory') fetchInventory();
-    if (tabName === 'bank') fetchBalance(); // Re-sync balance
+    // Sections
+    document.querySelectorAll('.magic-section').forEach(sec => sec.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
 }
 
 // --- SHOP ---
 async function fetchShopItems() {
     try {
-        const response = await fetch('/api/shop/items');
+        const response = await fetch('/api/shop/items', { credentials: 'include' });
         currentItems = await response.json();
         renderShop(currentItems);
-    } catch (err) {
-        console.error('Failed to fetch items', err);
-    }
+    } catch (err) { console.error(err); }
 }
 
 function renderShop(items) {
     const container = document.getElementById('shopContainer');
     container.innerHTML = items.map(item => `
-        <div class="item-card">
-            <img src="${item.image || 'assets/images/placeholder_item.png'}" class="item-image" alt="${item.name}">
-            <h3>${item.name}</h3>
-            <p>${item.type}</p>
-            <div class="item-price">💰 ${item.price} G</div>
-            <button class="buy-btn" onclick="buyItem('${item._id}')">Buy</button>
+        <div class="magic-card item-rarity-${item.rarity || 'common'}">
+            <div class="card-image">
+                <img src="${item.image || 'assets/images/placeholder_item.png'}" alt="${item.name}">
+            </div>
+            <div class="card-info">
+                <h3>${item.name}</h3>
+                <span class="item-type">${item.type}</span>
+                <div class="price-tag">🪙 ${item.price} G</div>
+                <button class="buy-spell-btn" onclick="buyItem('${item._id}')">Acquire</button>
+            </div>
         </div>
     `).join('');
 }
 
 window.buyItem = async function (itemId) {
-    if (!confirm('Buy this item?')) return;
-
+    if (!confirm('Spend gold to acquire this item?')) return;
     try {
         const response = await fetch('/api/shop/buy', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ itemId, quantity: 1 })
+            body: JSON.stringify({ itemId, quantity: 1 }),
+            credentials: 'include'
         });
         const data = await response.json();
-
         if (response.ok) {
-            alert('Purchase successful!');
             currentUser.balance = data.balance;
             renderUserProfile();
+            fetchInventory();
+            alert('Item acquired successfully!');
         } else {
             alert(data.message);
         }
-    } catch (err) {
-        alert('Purchase failed');
-    }
+    } catch (err) { alert('Transaction failed'); }
 }
 
-// --- INVENTORY ---
-async function fetchInventory() {
-    // Inventory is part of user object but we should refresh it
+// --- ADMIN MODAL ---
+window.openAdminModal = () => document.getElementById('adminModal').style.display = 'block';
+window.closeAdminModal = () => document.getElementById('adminModal').style.display = 'none';
+
+window.handleAddItem = async function (e) {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const itemData = {
+        name: formData.get('name'),
+        type: formData.get('type'),
+        price: formData.get('price'),
+        image: formData.get('image'), // In a real app, handle file upload
+        rarity: 'common'
+    };
+
     try {
-        const response = await fetch('/auth/me'); // Or dedicated /api/inventory
-        const data = await response.json();
-        if (data.authenticated) {
-            currentUser = data.user;
-            renderInventory(currentUser.inventory);
+        const response = await fetch('/api/shop/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(itemData),
+            credentials: 'include'
+        });
+
+        if (response.ok) {
+            alert('New artifact registered in the archives.');
+            closeAdminModal();
+            fetchShopItems();
+        } else {
+            alert('Failed to register item.');
         }
-    } catch (err) { console.log(err); }
-}
-
-function renderInventory(inventory) {
-    const container = document.getElementById('inventoryContainer');
-    if (!inventory || inventory.length === 0) {
-        container.innerHTML = '<p>Your bag is empty.</p>';
-        return;
-    }
-
-    // Need to map item IDs to Item Names (from currentItems or fetch with populate)
-    // For now, let's assume currentItems has everything or we fallback
-
-    const inventoryHtml = inventory.map(slot => {
-        const itemDetails = currentItems.find(i => i._id === slot.itemId) || { name: 'Unknown Item', image: '' };
-        return `
-            <div class="item-card">
-                <img src="${itemDetails.image || 'assets/images/placeholder_item.png'}" class="item-image" alt="${itemDetails.name}">
-                <h3>${itemDetails.name}</h3>
-                <p>Qty: ${slot.quantity}</p>
-            </div>
-        `;
-    }).join('');
-
-    container.innerHTML = inventoryHtml;
+    } catch (err) { console.error(err); }
 }
 
 // --- CRAFTING ---
 async function fetchRecipes() {
     try {
-        const response = await fetch('/api/craft/recipes');
+        const response = await fetch('/api/craft/recipes', { credentials: 'include' });
         currentRecipes = await response.json();
         renderRecipes(currentRecipes);
-    } catch (err) {
-        console.error('Failed to fetch recipes', err);
-    }
+    } catch (err) { console.error(err); }
 }
 
 function renderRecipes(recipes) {
     const list = document.getElementById('recipeList');
     list.innerHTML = recipes.map(recipe => `
-        <div class="recipe-item" onclick="selectRecipe('${recipe._id}')">
-            <span>📜</span>
-            <div>
-                <strong>${recipe.resultItemId.name}</strong><br>
-                <small>${recipe.craftingType}</small>
-            </div>
+        <div class="scroll-item" onclick="selectRecipe('${recipe._id}')">
+            <h4>${recipe.resultItemId?.name || 'Unknown Recipe'}</h4>
+            <small>${recipe.craftingType}</small>
         </div>
     `).join('');
 }
 
 let selectedRecipe = null;
-
 window.selectRecipe = function (recipeId) {
     selectedRecipe = currentRecipes.find(r => r._id === recipeId);
     if (!selectedRecipe) return;
 
-    document.getElementById('craftingTitle').textContent = `Craft: ${selectedRecipe.resultItemId.name}`;
+    document.getElementById('craftingTitle').textContent = `Brewing: ${selectedRecipe.resultItemId.name}`;
 
-    // Show Ingredients
-    const ingredientsHtml = selectedRecipe.ingredients.map(ing => {
-        // Check if user has enough
-        const userItem = currentUser.inventory.find(i => i.itemId === ing.itemId._id);
-        const userQty = userItem ? userItem.quantity : 0;
-        const hasEnough = userQty >= ing.quantity;
+    // Check ingredients
+    const container = document.getElementById('craftingIngredients');
+    const userInv = currentUser.inventory || [];
 
+    const ingredientsHTML = selectedRecipe.ingredients.map(ing => {
+        const userHas = userInv.find(i => i.itemId === ing.itemId._id)?.quantity || 0;
+        const hasEnough = userHas >= ing.quantity;
         return `
-            <div style="color: ${hasEnough ? '#4caf50' : '#f44336'}">
-                ${ing.itemId.name}: ${userQty} / ${ing.quantity}
+            <div class="ingredient-check ${hasEnough ? 'ok' : 'missing'}">
+                <span>${ing.itemId.name}</span>
+                <span>${userHas}/${ing.quantity}</span>
             </div>
         `;
     }).join('');
 
-    document.getElementById('craftingIngredients').innerHTML = ingredientsHtml;
+    container.innerHTML = ingredientsHTML;
 
-    // Enable/Disable Button
+    // Enable button
     const canCraft = selectedRecipe.ingredients.every(ing => {
-        const userItem = currentUser.inventory.find(i => i.itemId === ing.itemId._id);
-        return userItem && userItem.quantity >= ing.quantity;
+        const userHas = userInv.find(i => i.itemId === ing.itemId._id)?.quantity || 0;
+        return userHas >= ing.quantity;
     });
 
     const btn = document.getElementById('craftBtn');
@@ -238,80 +208,97 @@ window.selectRecipe = function (recipeId) {
 }
 
 async function craftItem(recipeId) {
-    try {
-        const response = await fetch('/api/craft/craft', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ recipeId })
-        });
-        const data = await response.json();
+    const cauldron = document.querySelector('.cauldron-visual');
+    cauldron.classList.add('brewing'); // CSS Animation triggers
 
-        if (response.ok) {
-            alert('Crafting Successful!');
-            // Refresh
-            fetchInventory();
-            selectRecipe(recipeId); // Re-render status
-        } else {
-            alert(data.message);
+    setTimeout(async () => {
+        try {
+            const response = await fetch('/api/craft/craft', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ recipeId }),
+                credentials: 'include'
+            });
+            const data = await response.json();
+
+            cauldron.classList.remove('brewing');
+
+            if (response.ok) {
+                alert('Success! ' + data.message); // replace with nice modal later
+                fetchInventory();
+                selectRecipe(recipeId); // Refresh counts
+            } else {
+                alert(data.message);
+            }
+        } catch (err) {
+            cauldron.classList.remove('brewing');
+            alert('The spell fizzled out...');
         }
-    } catch (err) {
-        alert('Crafting failed');
-    }
+    }, 2000); // Fake delay for animation
 }
 
 // --- BANK ---
 async function fetchBalance() {
     try {
-        const response = await fetch('/api/bank/balance');
+        const response = await fetch('/api/bank/balance', { credentials: 'include' });
         const data = await response.json();
-        currentUser.balance = data.balance;
-        renderUserProfile();
+        if (data.balance !== undefined) {
+            currentUser.balance = data.balance;
+            renderUserProfile();
+        }
     } catch (err) { }
 }
 
 window.transferFunds = async function () {
     const recipient = document.getElementById('recipientId').value;
     const amount = document.getElementById('transferAmount').value;
-
     if (!recipient || !amount) return;
+
+    if (!confirm(`Transfer ${amount} G to ${recipient}?`)) return;
 
     try {
         const response = await fetch('/api/bank/transfer', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ recipientId: recipient, amount })
+            body: JSON.stringify({ recipientId: recipient, amount }),
+            credentials: 'include'
         });
         const data = await response.json();
-
         if (response.ok) {
-            alert('Transfer Successful!');
+            alert('Goblins have secured the transfer.');
             fetchBalance();
         } else {
             alert(data.message);
         }
-    } catch (err) {
-        alert('Transfer failed');
-    }
+    } catch (err) { alert('Transfer failed.'); }
 }
 
-// --- ADMIN ---
-window.openAddItemModal = function () {
-    const name = prompt("Item Name:");
-    if (!name) return;
-    const type = prompt("Type (material/potion/equipment):");
-    const price = prompt("Price:");
+// --- INVENTORY ---
+async function fetchInventory() {
+    try {
+        const response = await fetch('/auth/me', { credentials: 'include' });
+        const data = await response.json();
+        if (data.authenticated) {
+            currentUser = data.user; // Update global user state including inventory
+            const container = document.getElementById('inventoryContainer');
 
-    // Simple implementation for now
-    fetch('/api/shop/add', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, type, price, image: '', rarity: 'common' })
-    }).then(res => {
-        if (res.ok) {
-            alert("Item Added");
-            fetchShopItems();
-        } else {
-            alert("Failed");
+            if (!currentUser.inventory.length) {
+                container.innerHTML = '<p class="empty-msg">Your satchel is empty.</p>';
+                return;
+            }
+
+            container.innerHTML = currentUser.inventory.map(slot => {
+                // Fallback if populate didn't work fully, though it should have
+                const name = slot.itemId.name || 'Unknown Item';
+                const img = slot.itemId.image || 'assets/images/placeholder_item.png';
+                return `
+                    <div class="inventory-slot">
+                        <img src="${img}" alt="${name}">
+                        <span class="qty">${slot.quantity}</span>
+                        <div class="tooltip">${name}</div>
+                    </div>
+                 `;
+            }).join('');
         }
-    });
+    } catch (err) { }
 }
