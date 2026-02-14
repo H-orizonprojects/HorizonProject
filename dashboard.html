@@ -33,7 +33,7 @@
             <nav class="spell-nav">
                 <button class="spell-btn active" onclick="switchNav('shop')">🔮 Magic Shop</button>
                 <button class="spell-btn" onclick="switchNav('craft')">⚗️ Crafting Station</button>
-                <button class="spell-btn" onclick="switchNav('bank')">🏦 Gringotts Bank</button>
+                <button class="spell-btn" onclick="switchNav('bank')">🏦 Thanaraksh Bank</button>
                 <button class="spell-btn" onclick="switchNav('inventory')">🎒 Inventory</button>
                 <button class="spell-btn admin-only hidden" id="adminTabBtn" onclick="switchNav('admin')">⚙️
                     Admin</button>
@@ -66,9 +66,11 @@
                     <div class="alchemist-lab">
                         <div class="cauldron-container">
                             <div class="cauldron-visual">
-                                <div class="liquid"></div>
-                                <div class="bubbles">
-                                    <span></span><span></span><span></span>
+                                <img src="assets/item/brew1.png" alt="Cauldron" class="cauldron-img">
+                                <div class="brew-effects">
+                                    <span class="bubble-fx"></span><span class="bubble-fx"></span><span
+                                        class="bubble-fx"></span>
+                                    <div class="brew-glow"></div>
                                 </div>
                             </div>
                             <h3 id="craftingTitle">Select a Recipe</h3>
@@ -82,7 +84,7 @@
 
             <!-- BANK SECTION -->
             <section id="bank" class="magic-section">
-                <div class="gringotts-vault">
+                <div class="Thanaraksh-vault">
                     <div class="vault-door">
                         <div class="vault-gold-pile"></div>
                         <h2>Vault Balance</h2>
@@ -91,8 +93,8 @@
                     <div class="goblin-teller">
                         <h3>💸 Transfer Funds</h3>
                         <div class="input-group">
-                            <label>Recipient Username</label>
-                            <input type="text" id="recipientId" class="parchment-input" placeholder="e.g. Draco Malfoy">
+                            <label>Recipient (Discord username)</label>
+                            <input type="text" id="recipientId" class="parchment-input" placeholder="e.g. nxvxn_">
                         </div>
                         <div class="input-group">
                             <label>Amount</label>
@@ -121,8 +123,8 @@
                     <div class="admin-card">
                         <h3>💰 Manage Gold</h3>
                         <div class="input-group">
-                            <label>Target Username</label>
-                            <input type="text" id="adminTargetUser" class="parchment-input" placeholder="Username">
+                            <label>Target (Discord username)</label>
+                            <input type="text" id="adminTargetUser" class="parchment-input" placeholder="e.g. nxvxn_">
                         </div>
                         <div class="input-group">
                             <label>Amount (+add / -subtract)</label>
@@ -193,7 +195,13 @@
                     <option value="legendary">Legendary</option>
                 </select>
                 <input type="number" name="price" placeholder="Price (G)" required class="parchment-input">
-                <input type="text" name="image" placeholder="Image URL (Optional)" class="parchment-input">
+                <div class="upload-group">
+                    <label class="upload-label">Item Image</label>
+                    <input type="file" id="itemImageFile" accept="image/*" class="parchment-input">
+                    <span class="upload-or">— or paste URL —</span>
+                    <input type="text" name="image" id="itemImageUrl" placeholder="Image URL" class="parchment-input">
+                    <div id="imagePreview" class="image-preview"></div>
+                </div>
                 <button type="submit" class="spell-btn">Conjure Item</button>
             </form>
         </div>

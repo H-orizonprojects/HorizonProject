@@ -162,9 +162,36 @@ window.closeAdminModal = () => document.getElementById('adminModal').style.displ
 window.handleAddItem = async function (e) {
     e.preventDefault();
     const fd = new FormData(e.target);
+
+    let imageUrl = fd.get('image') || '';
+
+    // If user uploaded a file, upload it first
+    const fileInput = document.getElementById('itemImageFile');
+    if (fileInput && fileInput.files.length > 0) {
+        const uploadData = new FormData();
+        uploadData.append('image', fileInput.files[0]);
+        try {
+            const uploadRes = await fetch('/api/shop/upload', {
+                method: 'POST', body: uploadData, credentials: 'include'
+            });
+            if (uploadRes.ok) {
+                const result = await uploadRes.json();
+                imageUrl = result.imageUrl;
+            } else {
+                const err = await uploadRes.json();
+                alert('Image upload failed: ' + err.message);
+                return;
+            }
+        } catch (err) {
+            console.error('Upload error:', err);
+            alert('Image upload failed');
+            return;
+        }
+    }
+
     const itemData = {
         name: fd.get('name'), description: fd.get('description'), type: fd.get('type'),
-        price: parseInt(fd.get('price')), image: fd.get('image'), rarity: fd.get('rarity') || 'common'
+        price: parseInt(fd.get('price')), image: imageUrl, rarity: fd.get('rarity') || 'common'
     };
     try {
         const r = await fetch('/api/shop/add', {
@@ -176,12 +203,32 @@ window.handleAddItem = async function (e) {
             closeAdminModal();
             fetchShopItems();
             e.target.reset();
+            document.getElementById('imagePreview').innerHTML = '';
         } else {
             const data = await r.json();
             alert('Failed: ' + data.message);
         }
     } catch (err) { console.error(err); }
 }
+
+// Image file preview
+document.addEventListener('DOMContentLoaded', () => {
+    const fileInput = document.getElementById('itemImageFile');
+    if (fileInput) {
+        fileInput.addEventListener('change', (e) => {
+            const preview = document.getElementById('imagePreview');
+            if (e.target.files.length > 0) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    preview.innerHTML = `<img src="${ev.target.result}" alt="Preview">`;
+                };
+                reader.readAsDataURL(e.target.files[0]);
+            } else {
+                preview.innerHTML = '';
+            }
+        });
+    }
+});
 
 // ═══════════════════════════════════════════════
 // CRAFTING STATION
@@ -294,7 +341,7 @@ function spawnCraftSuccess(itemName) {
 }
 
 // ═══════════════════════════════════════════════
-// GRINGOTTS BANK
+// Thanaraksh BANK
 // ═══════════════════════════════════════════════
 async function fetchBalance() {
     try {
@@ -401,7 +448,7 @@ function showTransferReceipt(tx) {
     const content = document.getElementById('receiptContent');
     content.innerHTML = `
         <div class="receipt-header">
-            <h2>🏦 Gringotts Wizarding Bank</h2>
+            <h2>🏦 Thanaraksh Wizarding Bank</h2>
             <p>Official Transfer Receipt</p>
         </div>
         <hr class="receipt-divider">
@@ -427,7 +474,7 @@ window.downloadReceipt = function () {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `gringotts_receipt_${Date.now()}.txt`;
+    a.download = `Thanaraksh_receipt_${Date.now()}.txt`;
     a.click();
     URL.revokeObjectURL(url);
 }

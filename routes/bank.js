@@ -95,7 +95,7 @@ router.post('/admin/adjust', isAuthenticated, hasRole(['admin', 'professor']), a
 
     try {
         const target = await User.findOne({
-            $or: [{ discordId: targetUserId }, { username: targetUserId }, { _id: targetUserId }]
+            $or: [{ discordId: targetUserId }, { username: targetUserId }]
         });
 
         if (!target) return res.status(404).json({ message: 'User not found' });

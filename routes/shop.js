@@ -1,8 +1,32 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+const path = require('path');
 const Item = require('../models/Item');
 const User = require('../models/User');
 const { isAuthenticated, hasRole } = require('../middleware/auth');
+
+// Multer config for image uploads
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, path.join(__dirname, '..', 'assets', 'item'));
+    },
+    filename: (req, file, cb) => {
+        const uniqueName = 'item_' + Date.now() + path.extname(file.originalname);
+        cb(null, uniqueName);
+    }
+});
+
+const upload = multer({
+    storage,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+    fileFilter: (req, file, cb) => {
+        const allowed = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
+        const ext = path.extname(file.originalname).toLowerCase();
+        if (allowed.includes(ext)) cb(null, true);
+        else cb(new Error('Only image files are allowed'));
+    }
+});
 
 // Get all items
 router.get('/items', async (req, res) => {
@@ -73,6 +97,13 @@ router.post('/use', isAuthenticated, async (req, res) => {
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
+});
+
+// Upload image (Admin only) - returns the URL
+router.post('/upload', isAuthenticated, hasRole(['admin', 'professor']), upload.single('image'), (req, res) => {
+    if (!req.file) return res.status(400).json({ message: 'No image uploaded' });
+    const imageUrl = '/assets/item/' + req.file.filename;
+    res.json({ imageUrl });
 });
 
 // Add item (Admin only)
