@@ -1,0 +1,250 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Outfit:wght@300;400;600&display=swap');
+
+:root {
+    --bg-black: #050505;
+    --gold: #d4af37;
+    --gold-glow: rgba(212, 175, 55, 0.5);
+    --purple: #4b0082;
+    --purple-light: #8a2be2;
+    --text-light: #e0e0e0;
+    --transition-slow: 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-black);
+    color: var(--text-light);
+    font-family: 'Outfit', sans-serif;
+    overflow-x: hidden;
+    line-height: 1.6;
+}
+
+h1,
+h2,
+h3,
+.cinzel {
+    font-family: 'Cinzel', serif;
+    letter-spacing: 2px;
+}
+
+/* Magic Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-black);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--gold);
+    border-radius: 10px;
+}
+
+/* Glow Utilities */
+.text-glow-gold {
+    text-shadow: 0 0 10px var(--gold-glow), 0 0 20px var(--gold-glow);
+}
+
+.border-glow-purple {
+    border: 1px solid var(--purple);
+    box-shadow: 0 0 15px rgba(138, 43, 226, 0.3);
+}
+
+/* Glassmorphism */
+.glass {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+}
+
+/* Base Link Styles */
+a {
+    color: var(--gold);
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+a:hover {
+    color: var(--purple-light);
+    text-shadow: 0 0 8px var(--purple-light);
+}
+
+/* Lock Screen Overlay */
+#lock-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    transition: opacity 1.5s ease;
+    overflow: hidden;
+}
+
+#lock-screen.unlocked {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.lock-container {
+    position: relative;
+    width: 300px;
+    height: 300px;
+}
+
+.chain-svg {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 0 10px var(--gold));
+    transition: all 0.8s ease;
+}
+
+/* Chain breaking animation */
+.chain-svg.breaking {
+    animation: shatter 0.8s ease-out forwards;
+}
+
+@keyframes shatter {
+    0% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.3) rotate(15deg);
+        opacity: 0.7;
+    }
+
+    100% {
+        transform: scale(2) rotate(45deg);
+        opacity: 0;
+        filter: drop-shadow(0 0 30px var(--gold)) blur(5px);
+    }
+}
+
+.lock-icon {
+    width: 100px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    filter: drop-shadow(0 0 15px var(--gold-glow));
+}
+
+.lock-icon:hover {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 25px var(--gold)) drop-shadow(0 0 40px var(--purple));
+}
+
+/* Lock icon unlocking animation */
+.lock-icon.unlocking {
+    animation: unlockPulse 0.8s ease-out forwards;
+}
+
+@keyframes unlockPulse {
+    0% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+        filter: drop-shadow(0 0 15px var(--gold-glow));
+    }
+
+    25% {
+        transform: scale(1.2) rotate(-10deg);
+        filter: drop-shadow(0 0 40px var(--gold)) drop-shadow(0 0 60px var(--purple));
+    }
+
+    50% {
+        transform: scale(0.9) rotate(10deg);
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: scale(0) rotate(360deg);
+        opacity: 0;
+        filter: drop-shadow(0 0 80px var(--gold)) drop-shadow(0 0 100px var(--purple));
+    }
+}
+
+.lock-status {
+    margin-top: 2rem;
+    color: var(--gold);
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    letter-spacing: 5px;
+    transition: all 0.5s ease;
+}
+
+.lock-status.fading {
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
+/* Magical particle effects */
+.particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: var(--gold);
+    border-radius: 50%;
+    pointer-events: none;
+    box-shadow: 0 0 10px var(--gold), 0 0 20px var(--gold);
+}
+
+/* Fantasy glow overlay */
+.magic-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle,
+            rgba(212, 175, 55, 0.3) 0%,
+            rgba(138, 43, 226, 0.2) 40%,
+            transparent 70%);
+    border-radius: 50%;
+    opacity: 0;
+    animation: glowPulse 2s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes glowPulse {
+
+    0%,
+    100% {
+        opacity: 0.3;
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+    50% {
+        opacity: 0.6;
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+}
+
+.magic-glow.burst {
+    animation: glowBurst 1s ease-out forwards;
+}
+
+@keyframes glowBurst {
+    0% {
+        opacity: 0.8;
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(3);
+    }
+}

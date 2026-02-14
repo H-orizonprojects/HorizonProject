@@ -4,7 +4,10 @@
     "description": "Magical World Project - Eternity",
     "scripts": {
         "start": "node server.js",
-        "dev": "node server.js",
+        "server": "nodemon server.js",
+        "client": "cd frontend && npm run dev",
+        "dev": "npx concurrently \"npm run server\" \"npm run client\"",
+        "build": "cd frontend && npm run build",
         "encrypt": "node tools/encrypt-page.mjs winchester.html eternity && node tools/encrypt-page.mjs rachata_house.html eternity"
     },
     "dependencies": {
@@ -23,5 +26,9 @@
     },
     "engines": {
         "node": ">=18.0.0"
+    },
+    "devDependencies": {
+        "concurrently": "^9.2.1",
+        "nodemon": "^3.1.11"
     }
 }

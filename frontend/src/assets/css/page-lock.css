@@ -1,0 +1,261 @@
+/* Page Lock - Dark Overlay with Key Animation */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap');
+
+.page-lock-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(20px);
+}
+
+.page-lock-overlay.unlocked {
+    animation: lockFadeOut 1s ease forwards;
+    pointer-events: none;
+}
+
+@keyframes lockFadeOut {
+    0% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+.lock-visual {
+    position: relative;
+    margin-bottom: 2rem;
+}
+
+.lock-key-icon {
+    font-size: 5rem;
+    filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.6));
+    animation: lockFloat 3s ease-in-out infinite;
+}
+
+@keyframes lockFloat {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-12px);
+    }
+}
+
+.lock-key-icon.shake {
+    animation: lockShake 0.5s ease;
+}
+
+@keyframes lockShake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    20% {
+        transform: translateX(-15px) rotate(-5deg);
+    }
+
+    40% {
+        transform: translateX(15px) rotate(5deg);
+    }
+
+    60% {
+        transform: translateX(-10px) rotate(-3deg);
+    }
+
+    80% {
+        transform: translateX(10px) rotate(3deg);
+    }
+}
+
+.lock-key-icon.unlocking {
+    animation: keyTurn 1s ease forwards;
+}
+
+@keyframes keyTurn {
+    0% {
+        transform: rotate(0deg) scale(1);
+        filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.6));
+    }
+
+    50% {
+        transform: rotate(90deg) scale(1.3);
+        filter: drop-shadow(0 0 40px rgba(212, 175, 55, 1));
+    }
+
+    100% {
+        transform: rotate(360deg) scale(0);
+        filter: drop-shadow(0 0 80px rgba(212, 175, 55, 1));
+        opacity: 0;
+    }
+}
+
+.lock-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(212, 175, 55, 0.15) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: lockGlowPulse 2s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes lockGlowPulse {
+
+    0%,
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.5;
+    }
+
+    50% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 0.8;
+    }
+}
+
+.lock-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1.8rem;
+    color: #d4af37;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+    letter-spacing: 3px;
+}
+
+.lock-subtitle {
+    color: #8a2be2;
+    font-size: 0.95rem;
+    margin-bottom: 2rem;
+    opacity: 0.8;
+}
+
+.lock-input-group {
+    display: flex;
+    gap: 0;
+    border: 2px solid rgba(212, 175, 55, 0.4);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: border-color 0.3s;
+}
+
+.lock-input-group:focus-within {
+    border-color: #d4af37;
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+}
+
+.lock-input {
+    background: rgba(255, 255, 255, 0.05);
+    border: none;
+    padding: 1rem 1.5rem;
+    color: #e0e0e0;
+    font-size: 1rem;
+    font-family: 'Outfit', sans-serif;
+    width: 250px;
+    outline: none;
+}
+
+.lock-input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.lock-submit {
+    background: linear-gradient(135deg, #d4af37, #b8960c);
+    border: none;
+    padding: 1rem 1.5rem;
+    color: #000;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: 'Cinzel', serif;
+}
+
+.lock-submit:hover {
+    background: linear-gradient(135deg, #e8c84a, #d4af37);
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+}
+
+.lock-error {
+    color: #ff4444;
+    font-size: 0.9rem;
+    margin-top: 1rem;
+    min-height: 1.5rem;
+    transition: opacity 0.3s;
+}
+
+.lock-particles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 99998;
+    overflow: hidden;
+}
+
+.lock-particle {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: #d4af37;
+    border-radius: 50%;
+    opacity: 0;
+    box-shadow: 0 0 6px #d4af37;
+}
+
+/* Dark chain decorations */
+.lock-chain {
+    position: absolute;
+    font-size: 2rem;
+    color: rgba(212, 175, 55, 0.15);
+    pointer-events: none;
+}
+
+.lock-chain-left {
+    left: 2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    writing-mode: vertical-lr;
+    letter-spacing: 8px;
+}
+
+.lock-chain-right {
+    right: 2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    writing-mode: vertical-lr;
+    letter-spacing: 8px;
+}
+
+@media (max-width: 768px) {
+    .lock-title {
+        font-size: 1.3rem;
+    }
+
+    .lock-input {
+        width: 180px;
+    }
+
+    .lock-chain {
+        display: none;
+    }
+}

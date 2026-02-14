@@ -10,7 +10,7 @@ const cors = require('cors');
 require('./config/passport');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 12500;
 
 if (!process.env.MONGODB_URI) {
     console.error('CRITICAL: MONGODB_URI is not defined in environment variables!');
@@ -44,8 +44,8 @@ app.use(session({
 }));
 
 // Passport Middleware
-app.use(passport.initialize());
-app.use(passport.session());
+app.use(passport?.initialize());
+app.use(passport?.session());
 
 // Database Connection
 mongoose.connect(process.env.MONGODB_URI)
@@ -53,7 +53,8 @@ mongoose.connect(process.env.MONGODB_URI)
     .catch(err => console.log(err));
 
 // Static Files
-app.use(express.static(path.join(__dirname, '/')));
+app.use('/assets', express.static(path.join(__dirname, 'frontend/dist/assets')));
+app.use(express.static(path.join(__dirname, 'assets'))); // Original assets for components
 
 // Routes
 const authRoutes = require('./routes/auth');
@@ -70,9 +71,13 @@ app.use('/api/craft', craftRoutes);
 app.use('/api/bank', bankRoutes);
 app.use('/api/users', usersRoutes);
 
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
+// Serve Vue SPA (only in production)
+if (process.env.NODE_ENV === 'production') {
+    app.use(express.static(path.join(__dirname, 'frontend/dist')));
+    app.get('*', (req, res) => {
+        res.sendFile(path.join(__dirname, 'frontend/dist/index.html'));
+    });
+}
 
 // Start Server
 if (require.main === module) {
