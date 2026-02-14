@@ -12,6 +12,10 @@ require('./config/passport');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+if (!process.env.MONGODB_URI) {
+    console.error('CRITICAL: MONGODB_URI is not defined in environment variables!');
+}
+
 // Trust Proxy for Vercel
 app.set('trust proxy', 1);
 
@@ -27,11 +31,11 @@ app.use(session({
     secret: process.env.SESSION_SECRET || 'secret',
     resave: false,
     saveUninitialized: false,
-    store: MongoStore.create({
+    store: (process.env.MONGODB_URI) ? MongoStore.create({
         mongoUrl: process.env.MONGODB_URI,
         collectionName: 'sessions',
         ttl: 14 * 24 * 60 * 60 // 14 days
-    }),
+    }) : undefined,
     cookie: {
         secure: process.env.NODE_ENV === 'production', // True on Vercel
         sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
