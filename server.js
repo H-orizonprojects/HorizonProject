@@ -63,10 +63,12 @@ app.use('/auth', authRoutes);
 const shopRoutes = require('./routes/shop');
 const craftRoutes = require('./routes/craft');
 const bankRoutes = require('./routes/bank');
+const usersRoutes = require('./routes/users');
 
 app.use('/api/shop', shopRoutes);
 app.use('/api/craft', craftRoutes);
 app.use('/api/bank', bankRoutes);
+app.use('/api/users', usersRoutes);
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));

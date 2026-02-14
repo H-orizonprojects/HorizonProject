@@ -29,10 +29,8 @@ router.post('/buy', isAuthenticated, async (req, res) => {
             return res.status(400).json({ message: 'Insufficient funds' });
         }
 
-        // Deduct balance
         user.balance -= totalCost;
 
-        // Add to inventory
         const existingItemIndex = user.inventory.findIndex(i => i.itemId.toString() === itemId);
         if (existingItemIndex > -1) {
             user.inventory[existingItemIndex].quantity += quantity;
@@ -47,18 +45,47 @@ router.post('/buy', isAuthenticated, async (req, res) => {
     }
 });
 
+// Use/Consume item from inventory
+router.post('/use', isAuthenticated, async (req, res) => {
+    const { itemId } = req.body;
+
+    try {
+        const user = await User.findById(req.user.id);
+        const slot = user.inventory.find(i => i.itemId.toString() === itemId);
+
+        if (!slot || slot.quantity <= 0) {
+            return res.status(400).json({ message: 'Item not in inventory' });
+        }
+
+        slot.quantity -= 1;
+        if (slot.quantity <= 0) {
+            user.inventory = user.inventory.filter(i => i.itemId.toString() !== itemId);
+        }
+
+        await user.save();
+
+        const item = await Item.findById(itemId);
+        res.json({
+            message: `Used ${item ? item.name : 'item'} successfully`,
+            itemName: item ? item.name : 'Unknown',
+            inventory: user.inventory
+        });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
 // Add item (Admin only)
-// Assuming 'admin' role check or specific user check
-router.post('/add', isAuthenticated, async (req, res) => {
-    // Add admin check here or use middleware
-    const { name, type, price, image, rarity, effects } = req.body;
+router.post('/add', isAuthenticated, hasRole(['admin', 'professor']), async (req, res) => {
+    const { name, type, price, image, rarity, effects, description } = req.body;
 
     const newItem = new Item({
         name,
+        description,
         type,
         price,
         image,
-        rarity,
+        rarity: rarity || 'common',
         effects
     });
 
@@ -67,6 +94,17 @@ router.post('/add', isAuthenticated, async (req, res) => {
         res.json(savedItem);
     } catch (err) {
         res.status(400).json({ message: err.message });
+    }
+});
+
+// Edit item (Admin only)
+router.put('/:id', isAuthenticated, hasRole(['admin', 'professor']), async (req, res) => {
+    try {
+        const updated = await Item.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        if (!updated) return res.status(404).json({ message: 'Item not found' });
+        res.json(updated);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
     }
 });
 

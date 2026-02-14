@@ -9,31 +9,50 @@ router.get('/discord', passport.authenticate('discord'));
 router.get('/discord/callback', passport.authenticate('discord', {
     failureRedirect: '/'
 }), (req, res) => {
-    // Successful authentication, redirect to dashboard or home
-    res.redirect('/dashboard.html'); // Assuming creating a dashboard page
+    res.redirect('/dashboard.html');
 });
 
 // Logout
 router.get('/logout', (req, res) => {
     req.logout((err) => {
-        if (err) { return next(err); }
+        if (err) { return res.redirect('/'); }
         res.redirect('/');
     });
 });
 
-// Get current user info - Important for frontend to check login status
-router.get('/me', (req, res) => {
+// Get current user info
+router.get('/me', async (req, res) => {
     if (req.isAuthenticated()) {
-        res.json({
-            authenticated: true,
-            user: {
-                username: req.user.username,
-                avatar: req.user.avatar,
-                roles: req.user.roles,
-                balance: req.user.balance,
-                house: req.user.house
-            }
-        });
+        // Populate inventory items for the frontend
+        const User = require('../models/User');
+        try {
+            const user = await User.findById(req.user.id).populate('inventory.itemId');
+            res.json({
+                authenticated: true,
+                user: {
+                    discordId: user.discordId,
+                    username: user.username,
+                    avatar: user.avatar,
+                    roles: user.roles,
+                    balance: user.balance,
+                    house: user.house,
+                    inventory: user.inventory
+                }
+            });
+        } catch (err) {
+            res.json({
+                authenticated: true,
+                user: {
+                    discordId: req.user.discordId,
+                    username: req.user.username,
+                    avatar: req.user.avatar,
+                    roles: req.user.roles,
+                    balance: req.user.balance,
+                    house: req.user.house,
+                    inventory: req.user.inventory || []
+                }
+            });
+        }
     } else {
         res.json({ authenticated: false });
     }

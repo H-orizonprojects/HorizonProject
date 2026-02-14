@@ -35,6 +35,8 @@
                 <button class="spell-btn" onclick="switchNav('craft')">⚗️ Crafting Station</button>
                 <button class="spell-btn" onclick="switchNav('bank')">🏦 Gringotts Bank</button>
                 <button class="spell-btn" onclick="switchNav('inventory')">🎒 Inventory</button>
+                <button class="spell-btn admin-only hidden" id="adminTabBtn" onclick="switchNav('admin')">⚙️
+                    Admin</button>
             </nav>
         </header>
 
@@ -82,23 +84,25 @@
             <section id="bank" class="magic-section">
                 <div class="gringotts-vault">
                     <div class="vault-door">
-                        <div class="vault-gold-pile">
-                            <!-- CSS Gold Pile -->
-                        </div>
+                        <div class="vault-gold-pile"></div>
                         <h2>Vault Balance</h2>
                         <div class="huge-balance"><span id="bankBalance">0</span> G</div>
                     </div>
                     <div class="goblin-teller">
                         <h3>💸 Transfer Funds</h3>
                         <div class="input-group">
-                            <label>Recipient ID / Username</label>
+                            <label>Recipient Username</label>
                             <input type="text" id="recipientId" class="parchment-input" placeholder="e.g. Draco Malfoy">
                         </div>
                         <div class="input-group">
                             <label>Amount</label>
-                            <input type="number" id="transferAmount" class="parchment-input" placeholder="0">
+                            <input type="number" id="transferAmount" class="parchment-input" placeholder="0" min="1">
                         </div>
-                        <button onclick="transferFunds()" class="goblin-btn">Send via Owl</button>
+                        <button onclick="transferFunds()" class="goblin-btn">Send via Owl 🦉</button>
+                    </div>
+                    <div class="transaction-history">
+                        <h3>📋 Transaction History</h3>
+                        <div id="transactionList" class="scroll-content"></div>
                     </div>
                 </div>
             </section>
@@ -107,6 +111,64 @@
             <section id="inventory" class="magic-section">
                 <h2>Wizard's Satchel</h2>
                 <div class="inventory-grid" id="inventoryContainer"></div>
+            </section>
+
+            <!-- ADMIN SECTION -->
+            <section id="admin" class="magic-section">
+                <h2>⚙️ Professor's Control Panel</h2>
+                <div class="admin-grid">
+                    <!-- Admin: Manage Gold -->
+                    <div class="admin-card">
+                        <h3>💰 Manage Gold</h3>
+                        <div class="input-group">
+                            <label>Target Username</label>
+                            <input type="text" id="adminTargetUser" class="parchment-input" placeholder="Username">
+                        </div>
+                        <div class="input-group">
+                            <label>Amount (+add / -subtract)</label>
+                            <input type="number" id="adminGoldAmount" class="parchment-input"
+                                placeholder="e.g. 100 or -50">
+                        </div>
+                        <div class="input-group">
+                            <label>Reason</label>
+                            <input type="text" id="adminGoldReason" class="parchment-input"
+                                placeholder="Reward / Penalty">
+                        </div>
+                        <button onclick="adminAdjustGold()" class="admin-btn">Apply</button>
+                    </div>
+
+                    <!-- Admin: Add Recipe -->
+                    <div class="admin-card">
+                        <h3>📜 Add Recipe</h3>
+                        <div class="input-group">
+                            <label>Result Item (select)</label>
+                            <select id="recipeResultItem" class="parchment-input"></select>
+                        </div>
+                        <div class="input-group">
+                            <label>Crafting Type</label>
+                            <select id="recipeCraftType" class="parchment-input">
+                                <option value="cauldron">Cauldron</option>
+                                <option value="machine">Machine</option>
+                                <option value="forge">Forge</option>
+                            </select>
+                        </div>
+                        <div id="ingredientInputs">
+                            <div class="ingredient-row">
+                                <select class="parchment-input ing-item"></select>
+                                <input type="number" class="parchment-input ing-qty" placeholder="Qty" min="1"
+                                    value="1">
+                            </div>
+                        </div>
+                        <button onclick="addIngredientRow()" class="admin-btn small">+ Ingredient</button>
+                        <button onclick="adminAddRecipe()" class="admin-btn">Create Recipe</button>
+                    </div>
+
+                    <!-- Admin: Manage Recipes -->
+                    <div class="admin-card">
+                        <h3>🗑️ Manage Recipes</h3>
+                        <div id="adminRecipeList" class="scroll-content"></div>
+                    </div>
+                </div>
             </section>
         </main>
     </div>
@@ -118,10 +180,17 @@
             <h2>Stock New Item</h2>
             <form id="addItemForm" onsubmit="handleAddItem(event)">
                 <input type="text" name="name" placeholder="Item Name" required class="parchment-input">
+                <input type="text" name="description" placeholder="Description" class="parchment-input">
                 <select name="type" required class="parchment-input">
                     <option value="material">Material</option>
                     <option value="potion">Potion</option>
                     <option value="equipment">Equipment</option>
+                </select>
+                <select name="rarity" class="parchment-input">
+                    <option value="common">Common</option>
+                    <option value="rare">Rare</option>
+                    <option value="epic">Epic</option>
+                    <option value="legendary">Legendary</option>
                 </select>
                 <input type="number" name="price" placeholder="Price (G)" required class="parchment-input">
                 <input type="text" name="image" placeholder="Image URL (Optional)" class="parchment-input">
@@ -129,6 +198,18 @@
             </form>
         </div>
     </div>
+
+    <!-- Transfer Receipt Modal -->
+    <div id="receiptModal" class="modal">
+        <div class="modal-content parchment receipt-slip">
+            <span class="close-modal" onclick="closeReceiptModal()">&times;</span>
+            <div id="receiptContent"></div>
+            <button onclick="downloadReceipt()" class="admin-btn">📄 Download Receipt</button>
+        </div>
+    </div>
+
+    <!-- Effects Overlay -->
+    <div id="effectsOverlay" class="effects-overlay"></div>
 
     <script src="js/dashboard.js"></script>
 </body>
