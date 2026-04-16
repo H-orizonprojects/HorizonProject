@@ -233,7 +233,7 @@ async function fetchShopItems(page = 1) {
             currentItems = [...currentItems, ...data];
         }
 
-        allItems = currentItems;
+        allItems = currentItems; // Keep for backward compatibility if needed, but loadAdminData will override with full list
         renderShop(currentItems);
 
         // Handle pagination visibility
@@ -1295,7 +1295,16 @@ window.submitSendGift = async function () {
 // ADMIN PANEL
 // ═══════════════════════════════════════════════
 async function loadAdminData() {
-    // Populate item dropdowns
+    // Populate item dropdowns with lightweight list
+    if (!allItems.length) {
+        try {
+            const r = await fetch('/api/shop/items/list', { credentials: 'include' });
+            if (r.ok) {
+                allItems = await r.json();
+            }
+        } catch (err) { console.error('Failed to load full item list for admin', err); }
+    }
+
     const items = allItems.length ? allItems : currentItems;
     const selects = document.querySelectorAll('#recipeResultItem, .ing-item');
     selects.forEach(sel => {

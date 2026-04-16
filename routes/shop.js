@@ -61,8 +61,8 @@ router.get('/items', async (req, res) => {
         }
 
         // To prevent Vercel 500 payload limit errors, we must be careful with huge Base64 results.
-        // If limit is not specified, we still cap it at a reasonable number if it's the first load.
-        const queryLimit = limit || 100; // Cap at 100 items if not specified
+        // If limit is not specified, we cap it at a very safe number (8) to stay under the 4.5MB limit.
+        const queryLimit = limit || 8; 
         const skip = (page - 1) * queryLimit;
 
         const items = await Item.find(filter)
@@ -75,6 +75,17 @@ router.get('/items', async (req, res) => {
     } catch (err) {
         console.error('[Shop API] Error fetching items:', err);
         res.status(500).json({ message: 'Internal server error while fetching items.', error: err.message });
+    }
+});
+
+// ── GET /items/list — Lightweight list for dropdowns (IDs and Names only) ─────
+router.get('/items/list', async (req, res) => {
+    try {
+        const items = await Item.find().select('_id name type image').lean();
+        res.json(items);
+    } catch (err) {
+        console.error('[Shop API] Error fetching item list:', err);
+        res.status(500).json({ message: 'Internal server error while fetching item list.' });
     }
 });
 
