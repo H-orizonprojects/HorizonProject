@@ -1,3 +1,15 @@
+/**
+ * @layer L7 — Application
+ * Shop routes with L6 CacheManager integration.
+ *
+ * GET /items      — served from cache (60 s TTL), DB hit only on miss
+ * POST /add       — invalidates cache after write
+ * PUT  /:id       — invalidates cache after write
+ * DELETE /:id     — invalidates cache after write
+ */
+
+'use strict';
+
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
@@ -7,13 +19,16 @@ const User = require('../models/User');
 const { isAuthenticated, hasRole, isNotDetained } = require('../middleware/auth');
 const { sanitizeBody } = require('../middleware/sanitize');
 
-// Multer config for image uploads
-// Multer config for image uploads (Memory Storage for Base64)
-const storage = multer.memoryStorage();
+// L6: CacheManager singleton — in-memory TTL cache
+const cache = require('../utils/cache');
+const SHOP_ITEMS_KEY = 'shop_items';       // Base cache key
+const SHOP_CACHE_TTL = 60 * 1000;          // 60 seconds
 
+// ── Multer: memory storage for Base64 upload ─────────────────────────────────
+const storage = multer.memoryStorage();
 const upload = multer({
     storage,
-    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB limit
     fileFilter: (req, file, cb) => {
         const allowed = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
         const ext = path.extname(file.originalname).toLowerCase();
@@ -22,19 +37,34 @@ const upload = multer({
     }
 });
 
-// Get all items (optional ?type= filter)
+// ── GET /items ────────────────────────────────────────────────────────────────
+// L6: Check cache first. Build a per-type cache key so filtered and unfiltered
+//     results are cached independently.
 router.get('/items', async (req, res) => {
     try {
+        const typeFilter = req.query.type || 'all';
+        const cacheKey = `${SHOP_ITEMS_KEY}:${typeFilter}`;
+
+        // L6: Cache hit — return immediately without touching MongoDB
+        const cached = cache.get(cacheKey);
+        if (cached) {
+            return res.json(cached);
+        }
+
+        // L6: Cache miss — query DB then populate cache
         const filter = {};
         if (req.query.type) filter.type = req.query.type;
-        const items = await Item.find(filter);
+
+        const items = await Item.find(filter).lean(); // lean() = plain JS objects, faster serialization
+        cache.set(cacheKey, items, SHOP_CACHE_TTL);
+
         res.json(items);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
 });
 
-// Buy item
+// ── POST /buy ─────────────────────────────────────────────────────────────────
 router.post('/buy', isAuthenticated, isNotDetained, sanitizeBody, async (req, res) => {
     const { itemId, quantity } = req.body;
 
@@ -118,7 +148,7 @@ router.post('/buy', isAuthenticated, isNotDetained, sanitizeBody, async (req, re
     }
 });
 
-// Use/Consume item from inventory
+// ── POST /use ─────────────────────────────────────────────────────────────────
 router.post('/use', isAuthenticated, isNotDetained, sanitizeBody, async (req, res) => {
     const { itemId, targetUsername } = req.body;
 
@@ -225,7 +255,7 @@ router.post('/use', isAuthenticated, isNotDetained, sanitizeBody, async (req, re
     }
 });
 
-// Upload image (Admin only) - returns Base64 URL
+// ── POST /upload — Image upload (Admin only, returns Base64 URL) ──────────────
 router.post('/upload', isAuthenticated, hasRole(['admin', 'professor']), upload.single('image'), (req, res) => {
     if (!req.file) return res.status(400).json({ message: 'No image uploaded' });
 
@@ -234,7 +264,8 @@ router.post('/upload', isAuthenticated, hasRole(['admin', 'professor']), upload.
     res.json({ imageUrl: base64Image });
 });
 
-// Add item (Admin only)
+// ── POST /add — Add item (Admin only) ────────────────────────────────────────
+// L6: Invalidates all shop_items cache entries after write
 router.post('/add', isAuthenticated, hasRole(['admin', 'professor']), sanitizeBody, async (req, res) => {
     const { name, type, price, image, rarity, effects, description, mailboxMessage } = req.body;
 
@@ -256,27 +287,41 @@ router.post('/add', isAuthenticated, hasRole(['admin', 'professor']), sanitizeBo
 
     try {
         const savedItem = await newItem.save();
+
+        // L6: Invalidate cache — new item means cached lists are stale
+        cache.flush();
+
         res.json(savedItem);
     } catch (err) {
         res.status(400).json({ message: err.message });
     }
 });
 
-// Edit item (Admin only)
+// ── PUT /:id — Edit item (Admin only) ────────────────────────────────────────
+// L6: Invalidates cache after update
 router.put('/:id', isAuthenticated, hasRole(['admin', 'professor']), sanitizeBody, async (req, res) => {
     try {
         const updated = await Item.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (!updated) return res.status(404).json({ message: 'Item not found' });
+
+        // L6: Invalidate cache — item data changed
+        cache.flush();
+
         res.json(updated);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
 });
 
-// Delete item (Admin only)
+// ── DELETE /:id — Remove item (Admin only) ───────────────────────────────────
+// L6: Invalidates cache after delete
 router.delete('/:id', isAuthenticated, hasRole(['admin', 'professor']), async (req, res) => {
     try {
         await Item.findByIdAndDelete(req.params.id);
+
+        // L6: Invalidate cache — item removed from DB
+        cache.flush();
+
         res.json({ message: 'Item removed from archives.' });
     } catch (err) {
         res.status(500).json({ message: err.message });

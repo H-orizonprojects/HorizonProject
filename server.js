@@ -1,3 +1,11 @@
+/**
+ * @layer L2 — Data Link  : ConnectionManager (MongoDB lifecycle)
+ * @layer L4 — Transport   : Express HTTP server
+ * @layer L5 — Session     : express-session + MongoStore
+ */
+
+'use strict';
+
 require('dotenv').config({ populate: true });
 const express = require('express');
 const mongoose = require('mongoose');
@@ -6,6 +14,9 @@ const passport = require('passport');
 const path = require('path');
 const cors = require('cors');
 const helmet = require('helmet');
+
+// L2: ConnectionManager singleton — reuses connection across warm invocations
+const connectionManager = require('./utils/db');
 
 // Import Config
 require('./config/passport');
@@ -63,27 +74,20 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
-// ── MongoDB connection — single pool, capped for M0 free tier ──────────────
-const mongoClientPromise = mongoose.connect(process.env.MONGODB_URI, {
-    maxPoolSize: 5,               // M0 allows ~500 total; 5 per instance is safe on Vercel
-    serverSelectionTimeoutMS: 5000,
-    socketTimeoutMS: 45000,
-}).then(m => {
-    console.log('MongoDB Connected');
-    return m.connection.getClient();
-}).catch(err => {
-    console.error('MongoDB connection error:', err);
-    throw err;
-});
+// ── L2: MongoDB connection via singleton ─────────────────────────────────────
+// connectionManager.connect() caches the connection across warm Vercel
+// invocations. Returns immediately if already connected (readyState === 1).
+const mongoClientPromise = connectionManager.connect();
 
+// L5: Session Setup — MongoStore reuses the SAME connection (no second pool)
 const MongoStore = require('connect-mongo');
 
-// Session Setup — MongoStore reuses the SAME connection (no second pool)
 app.use(session({
     secret: process.env.SESSION_SECRET || 'secret',
     resave: false,
     saveUninitialized: false,
     store: process.env.MONGODB_URI ? MongoStore.create({
+        // L2: lazy promise — resolves to the same MongoClient once connected
         clientPromise: mongoClientPromise,
         collectionName: 'sessions',
         ttl: 14 * 24 * 60 * 60 // 14 days

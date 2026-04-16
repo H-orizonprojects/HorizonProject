@@ -1,9 +1,20 @@
+/**
+ * @layer L7 — Application
+ * User routes.
+ *
+ * Performance fix applied:
+ * - GET /faculty no longer performs a DB write on every request (write-on-read removed).
+ *   Write only occurs on first-time initialization (no config document exists yet).
+ */
+
+'use strict';
+
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const Config = require('../models/Config');
-const { isAuthenticated, hasRole } = require('../middleware/auth'); // ✅ ย้ายมาบนสุด
-const { sanitizeBody } = require('../middleware/sanitize');         // ✅ ย้ายมาบนสุด
+const { isAuthenticated, hasRole } = require('../middleware/auth');
+const { sanitizeBody } = require('../middleware/sanitize');
 
 // Lightweight: get current user's inventory only (avoids calling /auth/me repeatedly)
 router.get('/me/inventory', async (req, res) => {
@@ -201,33 +212,32 @@ router.post('/boosters', isAuthenticated, hasRole(['admin', 'professor']), sanit
 });
 
 // Get Faculty Members
+// L7 fix: No longer performs a DB write on every GET (write-on-read removed).
+// Write only on first-time init when no config document exists yet.
+const DEFAULT_FACULTY = [
+    { name: 'Prof. Richard Moore', subject: 'Aweth', image: 'assets/images/Prof/Prof.Richard.png' },
+    { name: 'Prof. Mathal', subject: 'Charms', image: 'assets/images/Prof/Prof.Mathal.png' },
+    { name: 'Prof. King Zadkiel Winchester', subject: 'Faculty Member', image: 'assets/images/Prof/Prof.King.png' },
+    { name: 'Prof. Navin White Rosier', subject: 'Astronomy', image: 'assets/images/Prof/Prof. Navin White Rosier.png' },
+    { name: 'Prof. Tulphat Narintrapakdee', subject: 'Faculty Member', image: 'assets/images/Prof/Prof. Tulphat Narintrapakdee.png' },
+    { name: 'Prof. Sofia McQueen', subject: 'Herblology', image: 'assets/images/Prof/Prof. Sofia McQueen.png' },
+    { name: 'Prof. ScarDKillz', subject: 'Faculty Member', image: 'assets/images/Prof/Prof. ScarDKillz.png' },
+    { name: 'Sir. Ngong Ngaeng', subject: 'Faculty Member', image: 'assets/images/Prof/Sir. Ngong Ngaeng.png' },
+    { name: 'Prof. Mary Greengrass', subject: 'Faculty Member', image: 'assets/images/Prof/Prof.Mary Greengrass.png' }
+];
+
 router.get('/faculty', async (req, res) => {
     try {
-        const defaultFaculty = [
-            { name: 'Prof. Richard Moore', subject: 'Aweth', image: 'assets/images/Prof/Prof.Richard.png' },
-            { name: 'Prof. Mathal', subject: 'Charms', image: 'assets/images/Prof/Prof.Mathal.png' },
-            { name: 'Prof. King Zadkiel Winchester', subject: 'Faculty Member', image: 'assets/images/Prof/Prof.King.png' },
-            { name: 'Prof. Navin White Rosier', subject: 'Astronomy', image: 'assets/images/Prof/Prof. Navin White Rosier.png' },
-            { name: 'Prof. Tulphat Narintrapakdee', subject: 'Faculty Member', image: 'assets/images/Prof/Prof. Tulphat Narintrapakdee.png' },
-            { name: 'Prof. Sofia McQueen', subject: 'Herblology', image: 'assets/images/Prof/Prof. Sofia McQueen.png' },
-            { name: 'Prof. ScarDKillz', subject: 'Faculty Member', image: 'assets/images/Prof/Prof. ScarDKillz.png' },
-            { name: 'Sir. Ngong Ngaeng', subject: 'Faculty Member', image: 'assets/images/Prof/Sir. Ngong Ngaeng.png' },
-            { name: 'Prof. Mary Greengrass', subject: 'Faculty Member', image: 'assets/images/Prof/Prof.Mary Greengrass.png' }
-        ];
+        const facultyConfig = await Config.findOne({ key: 'faculty_members' }).lean();
 
-        let facultyConfig = await Config.findOne({ key: 'faculty_members' });
         if (!facultyConfig) {
-            facultyConfig = new Config({
-                key: 'faculty_members',
-                value: defaultFaculty
-            });
-            await facultyConfig.save();
-        } else {
-            // Auto-update db to ensure latest faculty list (like Mary Greengrass) is applied
-            facultyConfig.value = defaultFaculty;
-            facultyConfig.markModified('value');
-            await facultyConfig.save();
+            // First-time init only — write default list to DB once
+            const newConfig = new Config({ key: 'faculty_members', value: DEFAULT_FACULTY });
+            await newConfig.save();
+            return res.json(DEFAULT_FACULTY);
         }
+
+        // Config exists — serve from DB, no write needed
         res.json(facultyConfig.value);
     } catch (err) {
         res.status(500).json({ message: err.message });

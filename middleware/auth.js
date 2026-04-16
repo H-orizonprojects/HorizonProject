@@ -145,21 +145,35 @@ const checkGuildMembership = async (req, res, next) => {
     }
 };
 
+/**
+ * @layer L5 — Session
+ * Lean detention check — only fetches the 3 detention fields instead of the
+ * full User document, reducing per-request payload by ~95%.
+ */
 const isNotDetained = async (req, res, next) => {
     if (!req.isAuthenticated()) return res.status(401).json({ message: 'Unauthorized' });
     try {
-        const user = await User.findById(req.user.id);
-        if (user.isDetained && user.detentionEndDate && new Date() < new Date(user.detentionEndDate)) {
-            return res.status(403).json({ 
-                message: `You are currently in detention until ${new Date(user.detentionEndDate).toLocaleString('th-TH')}. Reason: ${user.detentionReason || 'Rule violation'}` 
+        const user = await User.findById(req.user.id)
+            .select('isDetained detentionEndDate detentionReason')  // L5: lean — only detention fields
+            .lean();                                                  // L5: plain object (no Mongoose overhead)
+
+        if (!user) return res.status(401).json({ message: 'Unauthorized' });
+
+        const now = new Date();
+
+        if (user.isDetained && user.detentionEndDate && now < new Date(user.detentionEndDate)) {
+            return res.status(403).json({
+                message: `You are currently in detention until ${new Date(user.detentionEndDate).toLocaleString('th-TH')}. Reason: ${user.detentionReason || 'Rule violation'}`
             });
         }
-        // If detention time has passed, clear it
-        if (user.isDetained && user.detentionEndDate && new Date() >= new Date(user.detentionEndDate)) {
-            user.isDetained = false;
-            user.detentionEndDate = null;
-            await user.save();
+
+        // If detention time has passed, clear it (fire-and-forget — non-blocking)
+        if (user.isDetained && user.detentionEndDate && now >= new Date(user.detentionEndDate)) {
+            User.findByIdAndUpdate(req.user.id, {
+                $set: { isDetained: false, detentionEndDate: null }
+            }).catch(e => console.error('[isNotDetained] clear error:', e));
         }
+
         next();
     } catch (err) {
         res.status(500).json({ message: 'Server error checking detention status.' });
