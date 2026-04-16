@@ -204,16 +204,59 @@ window.switchNav = function (tabId) {
     if (tabId === 'divination') fetchDivinationStatus();
 }
 
-// ═══════════════════════════════════════════════
-// MAGIC SHOP
-// ═══════════════════════════════════════════════
-async function fetchShopItems() {
+let currentShopPage = 1;
+const SHOP_PAGE_SIZE = 12; // Small size to ensure we don't hit Vercel payload limits
+
+async function fetchShopItems(page = 1) {
     try {
-        const response = await fetch('/api/shop/items', { credentials: 'include' });
-        currentItems = await response.json();
+        currentShopPage = page;
+        const typeParam = currentShopCategory !== 'all' ? `&type=${currentShopCategory}` : '';
+        const response = await fetch(`/api/shop/items?page=${page}&limit=${SHOP_PAGE_SIZE}${typeParam}`, { credentials: 'include' });
+        const data = await response.json();
+
+        if (!response.ok) {
+            console.error('Shop fetch failed:', data);
+            const container = document.getElementById('shopContainer');
+            if (container) {
+                container.innerHTML = `
+                    <div class="error-msg-box">
+                        <p>🔮 The market archives are currently unstable.</p>
+                        <small>${data.message || 'Please try again later.'}</small>
+                    </div>`;
+            }
+            return;
+        }
+
+        if (page === 1) {
+            currentItems = data;
+        } else {
+            currentItems = [...currentItems, ...data];
+        }
+
         allItems = currentItems;
         renderShop(currentItems);
-    } catch (err) { console.error('Failed to fetch shop items', err); }
+
+        // Handle pagination visibility
+        const pagination = document.getElementById('shopPagination');
+        if (pagination) {
+            if (data.length < SHOP_PAGE_SIZE) {
+                pagination.style.display = 'none';
+            } else {
+                pagination.style.display = 'block';
+            }
+        }
+
+    } catch (err) { 
+        console.error('Failed to fetch shop items', err);
+        const container = document.getElementById('shopContainer');
+        if (container) {
+            container.innerHTML = '<p class="empty-msg">Error connecting to the market archives. Check your connection.</p>';
+        }
+    }
+}
+
+window.loadMoreShopItems = function() {
+    fetchShopItems(currentShopPage + 1);
 }
 
 let currentShopCategory = 'all';
@@ -228,7 +271,8 @@ window.filterShop = function (category, btnEl) {
         if (btnEl) btnEl.classList.add('active');
     }
 
-    applyShopFilters();
+    // Reset and fetch from server for the specific category
+    fetchShopItems(1);
 }
 
 // Global scope for search input

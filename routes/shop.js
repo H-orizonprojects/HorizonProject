@@ -42,25 +42,39 @@ const upload = multer({
 //     results are cached independently.
 router.get('/items', async (req, res) => {
     try {
-        const typeFilter = req.query.type || 'all';
-        const cacheKey = `${SHOP_ITEMS_KEY}:${typeFilter}`;
+        const queryType = req.query.type;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 0; // Default to 0 (all) but handle in cache
+        
+        const typeFilter = queryType || 'all';
+        const cacheKey = `${SHOP_ITEMS_KEY}:${typeFilter}:p${page}:l${limit}`;
 
-        // L6: Cache hit — return immediately without touching MongoDB
+        // L6: Cache hit
         const cached = cache.get(cacheKey);
         if (cached) {
             return res.json(cached);
         }
 
-        // L6: Cache miss — query DB then populate cache
         const filter = {};
-        if (req.query.type) filter.type = req.query.type;
+        if (queryType && queryType !== 'all') {
+            filter.type = queryType;
+        }
 
-        const items = await Item.find(filter).lean(); // lean() = plain JS objects, faster serialization
+        // To prevent Vercel 500 payload limit errors, we must be careful with huge Base64 results.
+        // If limit is not specified, we still cap it at a reasonable number if it's the first load.
+        const queryLimit = limit || 100; // Cap at 100 items if not specified
+        const skip = (page - 1) * queryLimit;
+
+        const items = await Item.find(filter)
+            .skip(skip)
+            .limit(queryLimit)
+            .lean();
+
         cache.set(cacheKey, items, SHOP_CACHE_TTL);
-
         res.json(items);
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        console.error('[Shop API] Error fetching items:', err);
+        res.status(500).json({ message: 'Internal server error while fetching items.', error: err.message });
     }
 });
 

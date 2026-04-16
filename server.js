@@ -14,6 +14,8 @@ const passport = require('passport');
 const path = require('path');
 const cors = require('cors');
 const helmet = require('helmet');
+const compression = require('compression');
+
 
 // L2: ConnectionManager singleton — reuses connection across warm invocations
 const connectionManager = require('./utils/db');
@@ -22,6 +24,7 @@ const connectionManager = require('./utils/db');
 require('./config/passport');
 
 const app = express();
+app.use(compression());
 const PORT = process.env.PORT || 12500;
 
 // ── Security: Helmet (safe config — allows existing inline scripts/styles) ──
