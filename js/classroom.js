@@ -663,8 +663,9 @@ async function loadShopCategory(category, btnEl) {
     currentShopCategory = category;
 
     try {
-        const res = await fetch(`/api/shop/items?type=${category}`, { credentials: 'include' });
-        allShopItems = await res.json();
+        const res = await fetch(`/api/shop/items?type=${category}&limit=50`, { credentials: 'include' });
+        const data = await res.json();
+        allShopItems = data.items || [];
         filterShopItems(); // Re-render with any existing search
     } catch (err) {
         console.error('Failed to load shop items', err);

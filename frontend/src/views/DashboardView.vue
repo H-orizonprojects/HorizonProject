@@ -28,8 +28,8 @@ const switchTab = (tab: string) => {
 
 const fetchShopItems = async () => {
   try {
-    const res = await axios.get('/api/shop/items');
-    items.value = res.data;
+    const res = await axios.get('/api/shop/items?limit=50');
+    items.value = res.data.items || [];
   } catch (err) { console.error(err); }
 };
 

@@ -44,10 +44,13 @@ router.get('/items', async (req, res) => {
     try {
         const queryType = req.query.type;
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 0; // Default to 0 (all) but handle in cache
+        const limit = parseInt(req.query.limit);
         
         const typeFilter = queryType || 'all';
-        const cacheKey = `${SHOP_ITEMS_KEY}:${typeFilter}:p${page}:l${limit}`;
+        // Default to 12 to match frontend expectation
+        const effectiveLimit = (limit > 0) ? limit : 12;
+        
+        const cacheKey = `${SHOP_ITEMS_KEY}:${typeFilter}:p${page}:l${effectiveLimit}`;
 
         // L6: Cache hit
         const cached = cache.get(cacheKey);
@@ -60,18 +63,29 @@ router.get('/items', async (req, res) => {
             filter.type = queryType;
         }
 
-        // To prevent Vercel 500 payload limit errors, we must be careful with huge Base64 results.
-        // If limit is not specified, we cap it at a very safe number (8) to stay under the 4.5MB limit.
-        const queryLimit = limit || 8; 
-        const skip = (page - 1) * queryLimit;
+        // Cap limit to prevent Vercel payload errors
+        const finalLimit = Math.min(effectiveLimit, 24);
+        const skip = (page - 1) * finalLimit;
 
-        const items = await Item.find(filter)
-            .skip(skip)
-            .limit(queryLimit)
-            .lean();
+        // Fetch items and total count in parallel
+        const [items, total] = await Promise.all([
+            Item.find(filter)
+                .skip(skip)
+                .limit(finalLimit)
+                .lean(),
+            Item.countDocuments(filter)
+        ]);
 
-        cache.set(cacheKey, items, SHOP_CACHE_TTL);
-        res.json(items);
+        const responseData = {
+            items,
+            total,
+            page,
+            limit: finalLimit,
+            hasMore: total > (skip + items.length)
+        };
+
+        cache.set(cacheKey, responseData, SHOP_CACHE_TTL);
+        res.json(responseData);
     } catch (err) {
         console.error('[Shop API] Error fetching items:', err);
         res.status(500).json({ message: 'Internal server error while fetching items.', error: err.message });

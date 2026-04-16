@@ -227,22 +227,23 @@ async function fetchShopItems(page = 1) {
             return;
         }
 
+        const items = data.items || [];
         if (page === 1) {
-            currentItems = data;
+            currentItems = items;
         } else {
-            currentItems = [...currentItems, ...data];
+            currentItems = [...currentItems, ...items];
         }
 
-        allItems = currentItems; // Keep for backward compatibility if needed, but loadAdminData will override with full list
+        allItems = currentItems; 
         renderShop(currentItems);
 
-        // Handle pagination visibility
+        // Handle pagination visibility based on hasMore property from backend
         const pagination = document.getElementById('shopPagination');
         if (pagination) {
-            if (data.length < SHOP_PAGE_SIZE) {
-                pagination.style.display = 'none';
-            } else {
+            if (data.hasMore) {
                 pagination.style.display = 'block';
+            } else {
+                pagination.style.display = 'none';
             }
         }
 
