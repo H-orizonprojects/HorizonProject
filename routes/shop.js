@@ -67,14 +67,21 @@ router.get('/items', async (req, res) => {
         const finalLimit = Math.min(effectiveLimit, 24);
         const skip = (page - 1) * finalLimit;
 
-        // Fetch items and total count in parallel
-        const [items, total] = await Promise.all([
+        // Fetch items and total count. Omit 'image' to prevent massive Base64 strings from crashing Vercel payload limit.
+        const [rawItems, total] = await Promise.all([
             Item.find(filter)
+                .select('-image')
                 .skip(skip)
                 .limit(finalLimit)
                 .lean(),
             Item.countDocuments(filter)
         ]);
+
+        // Map items to proxy the image to our new endpoint
+        const items = rawItems.map(item => ({
+            ...item,
+            image: `/api/shop/image/${item._id}`
+        }));
 
         const responseData = {
             items,
@@ -96,10 +103,48 @@ router.get('/items', async (req, res) => {
 router.get('/items/list', async (req, res) => {
     try {
         const items = await Item.find().select('_id name type image').lean();
-        res.json(items);
+        
+        const mappedItems = items.map(item => ({
+            ...item,
+            image: item.image && item.image.startsWith('data:') ? `/api/shop/image/${item._id}` : item.image
+        }));
+
+        res.json(mappedItems);
     } catch (err) {
         console.error('[Shop API] Error fetching item list:', err);
         res.status(500).json({ message: 'Internal server error while fetching item list.' });
+    }
+});
+
+// ── GET /image/:id — Serve item image to bypass JSON payload limits ───────────
+router.get('/image/:id', async (req, res) => {
+    try {
+        const item = await Item.findById(req.params.id).select('image').lean();
+        if (!item || !item.image) {
+            return res.redirect('/assets/images/placeholder_item.png');
+        }
+
+        if (item.image.startsWith('data:image')) {
+            // Parse base64 and send as raw buffer
+            const match = item.image.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+            if (match) {
+                const buffer = Buffer.from(match[2], 'base64');
+                res.setHeader('Content-Type', match[1]);
+                res.setHeader('Content-Length', buffer.length);
+                res.setHeader('Cache-Control', 'public, max-age=86400'); // 1 day cache
+                return res.end(buffer);
+            }
+        }
+        
+        // If it's a URL or path
+        if (item.image.startsWith('http') || item.image.startsWith('/')) {
+             return res.redirect(item.image);
+        }
+
+        res.redirect('/assets/images/placeholder_item.png');
+    } catch (err) {
+        console.error('[Shop Image] Error serving image:', err);
+        res.status(500).end();
     }
 });
 

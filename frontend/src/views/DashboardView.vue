@@ -16,6 +16,11 @@ const showEffect = ref(false);
 const effectEmoji = ref('');
 const effectText = ref('');
 
+// Shop state
+const activeCategory = ref('all');
+const currentShopPage = ref(1);
+const hasMoreShopItems = ref(false);
+
 // Form state
 const transferRecipient = ref('');
 const transferAmount = ref(0);
@@ -26,11 +31,29 @@ const switchTab = (tab: string) => {
   if (tab === 'bank') fetchTransactions();
 };
 
-const fetchShopItems = async () => {
+const fetchShopItems = async (page = 1, append = false) => {
   try {
-    const res = await axios.get('/api/shop/items?limit=50');
-    items.value = res.data.items || [];
+    const typeParam = activeCategory.value !== 'all' ? `&type=${activeCategory.value}` : '';
+    const res = await axios.get(`/api/shop/items?page=${page}&limit=12${typeParam}`);
+    if (append) {
+      items.value = [...items.value, ...(res.data.items || [])];
+    } else {
+      items.value = res.data.items || [];
+    }
+    currentShopPage.value = page;
+    hasMoreShopItems.value = res.data.hasMore;
   } catch (err) { console.error(err); }
+};
+
+const filterShop = (category: string) => {
+  activeCategory.value = category;
+  fetchShopItems(1, false);
+};
+
+const loadMoreShopItems = () => {
+  if (hasMoreShopItems.value) {
+    fetchShopItems(currentShopPage.value + 1, true);
+  }
 };
 
 const fetchRecipes = async () => {
@@ -143,8 +166,18 @@ onMounted(async () => {
       <section v-if="activeTab === 'shop'" class="magic-section active">
         <div class="section-header">
           <h2>Diagon Alley Market</h2>
+          
+          <div class="shop-category-tabs" style="margin-top: 1rem; display: flex; gap: 0.5rem; overflow-x: auto;">
+            <button :class="['spell-btn', { active: activeCategory === 'all' }]" @click="filterShop('all')">All</button>
+            <button :class="['spell-btn', { active: activeCategory === 'material' }]" @click="filterShop('material')">Materials</button>
+            <button :class="['spell-btn', { active: activeCategory === 'food' }]" @click="filterShop('food')">Food</button>
+            <button :class="['spell-btn', { active: activeCategory === 'potion' }]" @click="filterShop('potion')">Potions</button>
+            <button :class="['spell-btn', { active: activeCategory === 'equipment' }]" @click="filterShop('equipment')">Equipment</button>
+            <button :class="['spell-btn', { active: activeCategory === 'seed' }]" @click="filterShop('seed')">Seeds</button>
+          </div>
         </div>
-        <div class="shop-shelves">
+        
+        <div class="shop-shelves" style="margin-top: 1.5rem;">
           <div v-for="item in items" :key="item._id" :class="['magic-card', `item-rarity-${item.rarity}`]">
             <div class="card-image">
               <img :src="item.image || '/assets/images/placeholder_item.png'">
@@ -156,6 +189,10 @@ onMounted(async () => {
               <button class="buy-spell-btn" @click="buyItem(item)">Acquire</button>
             </div>
           </div>
+        </div>
+
+        <div v-if="hasMoreShopItems" style="text-align: center; margin-top: 2rem;">
+          <button class="spell-btn" @click="loadMoreShopItems">Load More Magical Goods</button>
         </div>
       </section>
 
