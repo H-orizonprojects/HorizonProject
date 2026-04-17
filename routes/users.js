@@ -15,6 +15,8 @@ const User = require('../models/User');
 const Config = require('../models/Config');
 const { isAuthenticated, hasRole } = require('../middleware/auth');
 const { sanitizeBody } = require('../middleware/sanitize');
+const versionManager = require('../utils/version');
+const conditionalRequest = require('../middleware/conditional');
 
 // Lightweight: get current user's inventory only (avoids calling /auth/me repeatedly)
 router.get('/me/inventory', async (req, res) => {
@@ -166,7 +168,7 @@ router.post('/admin/health', isAuthenticated, hasRole(['admin', 'professor']), s
 });
 
 // Get Server Boosters
-router.get('/boosters', async (req, res) => {
+router.get('/boosters', conditionalRequest('boosters'), async (req, res) => {
     try {
         let boosterConfig = await Config.findOne({ key: 'server_boosters' });
         if (!boosterConfig) {
@@ -204,6 +206,7 @@ router.post('/boosters', isAuthenticated, hasRole(['admin', 'professor']), sanit
         // Use markModified because value is Mixed type
         config.markModified('value');
         await config.save();
+        await versionManager.increment('boosters');
 
         res.json({ message: 'Boosters configuration updated successfully.', boosters: config.value });
     } catch (err) {
@@ -226,7 +229,7 @@ const DEFAULT_FACULTY = [
     { name: 'Prof. Mary Greengrass', subject: 'Faculty Member', image: 'assets/images/Prof/Prof.Mary Greengrass.png' }
 ];
 
-router.get('/faculty', async (req, res) => {
+router.get('/faculty', conditionalRequest('faculty'), async (req, res) => {
     try {
         const facultyConfig = await Config.findOne({ key: 'faculty_members' }).lean();
 
@@ -261,6 +264,7 @@ router.post('/faculty', isAuthenticated, hasRole(['admin', 'professor']), saniti
 
         config.markModified('value');
         await config.save();
+        await versionManager.increment('faculty');
 
         res.json({ message: 'Faculty configuration updated successfully.', faculty: config.value });
     } catch (err) {

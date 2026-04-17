@@ -21,6 +21,9 @@ const { sanitizeBody } = require('../middleware/sanitize');
 
 // L6: CacheManager singleton — in-memory TTL cache
 const cache = require('../utils/cache');
+const versionManager = require('../utils/version');
+const conditionalRequest = require('../middleware/conditional');
+
 const SHOP_ITEMS_KEY = 'shop_items';       // Base cache key
 const SHOP_CACHE_TTL = 60 * 1000;          // 60 seconds
 
@@ -38,9 +41,8 @@ const upload = multer({
 });
 
 // ── GET /items ────────────────────────────────────────────────────────────────
-// L6: Check cache first. Build a per-type cache key so filtered and unfiltered
-//     results are cached independently.
-router.get('/items', async (req, res) => {
+// L6: Check conditional version first, then fallback to CacheManager.
+router.get('/items', conditionalRequest('shop'), async (req, res) => {
     try {
         const queryType = req.query.type;
         const page = parseInt(req.query.page) || 1;
@@ -374,6 +376,7 @@ router.post('/add', isAuthenticated, hasRole(['admin', 'professor']), sanitizeBo
 
         // L6: Invalidate cache — new item means cached lists are stale
         cache.flush();
+        await versionManager.increment('shop');
 
         res.json(savedItem);
     } catch (err) {
@@ -390,6 +393,7 @@ router.put('/:id', isAuthenticated, hasRole(['admin', 'professor']), sanitizeBod
 
         // L6: Invalidate cache — item data changed
         cache.flush();
+        await versionManager.increment('shop');
 
         res.json(updated);
     } catch (err) {
@@ -405,6 +409,7 @@ router.delete('/:id', isAuthenticated, hasRole(['admin', 'professor']), async (r
 
         // L6: Invalidate cache — item removed from DB
         cache.flush();
+        await versionManager.increment('shop');
 
         res.json({ message: 'Item removed from archives.' });
     } catch (err) {
