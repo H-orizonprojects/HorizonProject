@@ -62,7 +62,7 @@ function generateQuests() {
 // Get quests or generate if new day
 router.get('/', isAuthenticated, async (req, res) => {
     try {
-        const user = await User.findById(req.user._id);
+        const user = await User.findById(req.user.id);
         
         if (isNewQuestPeriod(user.lastQuestReset)) {
             user.dailyQuests = generateQuests();
@@ -80,7 +80,7 @@ router.get('/', isAuthenticated, async (req, res) => {
 router.post('/claim', isAuthenticated, async (req, res) => {
     try {
         const { questId } = req.body; // _id of the quest subdocument
-        const user = await User.findById(req.user._id);
+        const user = await User.findById(req.user.id);
         
         const quest = user.dailyQuests.id(questId);
         if (!quest) return res.status(404).json({ message: 'Quest not found' });
