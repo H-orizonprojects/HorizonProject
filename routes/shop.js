@@ -229,6 +229,8 @@ router.post('/buy', isAuthenticated, isNotDetained, sanitizeBody, async (req, re
             user.inventory.push({ itemId, quantity: finalQuantity });
         }
 
+        // Filter out ghost inventory slots (itemId = null) to prevent Mongoose validation failures
+        user.inventory = user.inventory.filter(i => i.itemId != null);
         user.markModified('inventory');
         await user.save();
 

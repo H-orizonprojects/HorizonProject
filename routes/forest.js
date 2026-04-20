@@ -212,7 +212,8 @@ router.post('/gather', isAuthenticated, isNotDetained, sanitizeBody, async (req,
             user.inventory.push({ itemId: randomItem._id, quantity: quantityGained });
         }
 
-        // user.lastForestGatherDate = now; // Now handled above
+        // Filter ghost slots before save
+        user.inventory = user.inventory.filter(i => i.itemId != null);
         user.markModified('inventory');
         await user.save();
 

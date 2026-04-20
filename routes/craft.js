@@ -124,6 +124,7 @@ router.post('/craft', isAuthenticated, isNotDetained, sanitizeBody, async (req, 
                 .filter(i => i.itemId != null)
                 .map(i => ({ itemId: i.itemId._id || i.itemId, quantity: i.quantity }));
 
+            user.inventory = user.inventory.filter(i => i.itemId != null);
             user.markModified('inventory');
             await user.save();
 
@@ -198,6 +199,7 @@ router.post('/craft', isAuthenticated, isNotDetained, sanitizeBody, async (req, 
             const effectiveRate = Math.min(100, recipe.successRate + craftSafetyBonus + divinationBonus - omenPenalty);
             if (Math.random() * 100 > effectiveRate) {
                 // Craft failed — still deduct ingredients, just no result
+                user.inventory = user.inventory.filter(i => i.itemId != null);
                 user.markModified('inventory');
                 await user.save();
                 const { updateQuestProgress } = require('../utils/quest');
@@ -228,6 +230,7 @@ router.post('/craft', isAuthenticated, isNotDetained, sanitizeBody, async (req, 
             resultItemDisplayName = resultItem ? resultItem.name : resultItemDisplayName;
         }
 
+        user.inventory = user.inventory.filter(i => i.itemId != null);
         user.markModified('inventory');
         await user.save();
 

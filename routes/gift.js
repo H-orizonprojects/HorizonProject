@@ -51,6 +51,8 @@ router.post('/send', isAuthenticated, sanitizeBody, async (req, res) => {
         if (sender.inventory[senderItemIndex].quantity <= 0) {
             sender.inventory = sender.inventory.filter(i => i.itemId.toString() !== itemId);
         }
+        // Filter ghost slots before save
+        sender.inventory = sender.inventory.filter(i => i.itemId != null);
         sender.markModified('inventory');
         await sender.save();
 
@@ -127,12 +129,14 @@ router.post('/claim', isAuthenticated, sanitizeBody, async (req, res) => {
                 }
             }
 
-            const existingItemIndex = recipient.inventory.findIndex(i => i.itemId.toString() === gift.itemId._id.toString());
+            const existingItemIndex = recipient.inventory.findIndex(i => i.itemId && i.itemId.toString() === gift.itemId._id.toString());
             if (existingItemIndex > -1) {
                 recipient.inventory[existingItemIndex].quantity += finalQuantity;
             } else {
                 recipient.inventory.push({ itemId: gift.itemId._id, quantity: finalQuantity });
             }
+            // Filter ghost slots before save
+            recipient.inventory = recipient.inventory.filter(i => i.itemId != null);
             recipient.markModified('inventory');
             await recipient.save();
         }

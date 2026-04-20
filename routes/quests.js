@@ -121,7 +121,9 @@ router.post('/claim', isAuthenticated, async (req, res) => {
         }
         
         quest.isClaimed = true;
-        user.markModified('inventory'); // If inventory changed
+        // Filter out ghost inventory slots (itemId = null) to prevent Mongoose validation failures
+        user.inventory = user.inventory.filter(i => i.itemId != null);
+        user.markModified('inventory');
         await user.save();
         
         res.json({ message: rewardMsg, balance: user.balance, quests: user.dailyQuests });
