@@ -181,8 +181,12 @@ router.post('/gather', isAuthenticated, isNotDetained, sanitizeBody, async (req,
         const roll = Math.random() * 100;
         let selectedRarity = 'common';
         
+        let epicThreshold = legThreshold + 3; // Epic sits just above legendary
+
         if (roll <= legThreshold) {
             selectedRarity = 'legendary';
+        } else if (roll <= epicThreshold) {
+            selectedRarity = 'epic';
         } else if (roll <= rareThreshold) {
             selectedRarity = 'rare';
         } else if (roll <= uncommonThreshold) {

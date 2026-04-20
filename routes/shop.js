@@ -48,11 +48,19 @@ router.get('/items', conditionalRequest('shop'), async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit);
         
+        // Determine if user is admin/professor (for material visibility)
+        let isAdmin = false;
+        if (req.user && req.user.id) {
+            const viewer = await User.findById(req.user.id).select('roles').lean();
+            isAdmin = viewer && viewer.roles && (viewer.roles.includes('admin') || viewer.roles.includes('professor'));
+        }
+
         const typeFilter = queryType || 'all';
+        const roleTag = isAdmin ? 'admin' : 'user';
         // Default to 12 to match frontend expectation
         const effectiveLimit = (limit > 0) ? limit : 12;
         
-        const cacheKey = `${SHOP_ITEMS_KEY}:${typeFilter}:p${page}:l${effectiveLimit}`;
+        const cacheKey = `${SHOP_ITEMS_KEY}:${typeFilter}:p${page}:l${effectiveLimit}:${roleTag}`;
 
         // L6: Cache hit
         const cached = cache.get(cacheKey);
@@ -62,7 +70,14 @@ router.get('/items', conditionalRequest('shop'), async (req, res) => {
 
         const filter = {};
         if (queryType && queryType !== 'all') {
+            // Non-admin requesting 'material' type: return empty
+            if (!isAdmin && queryType === 'material') {
+                return res.json({ items: [], total: 0, page, limit: effectiveLimit, hasMore: false });
+            }
             filter.type = queryType;
+        } else if (!isAdmin) {
+            // Non-admin viewing 'all': exclude materials
+            filter.type = { $ne: 'material' };
         }
 
         // Cap limit to prevent Vercel payload errors
@@ -159,6 +174,12 @@ router.post('/buy', isAuthenticated, isNotDetained, sanitizeBody, async (req, re
         if (!item) return res.status(404).json({ message: 'Item not found' });
 
         const user = await User.findById(req.user.id);
+
+        // Non-admin cannot buy materials — they must be obtained from forest/quests
+        const isAdmin = user.roles && (user.roles.includes('admin') || user.roles.includes('professor'));
+        if (!isAdmin && item.type === 'material') {
+            return res.status(403).json({ message: 'Materials cannot be purchased. Explore the Himmapan Forest or complete Daily Quests to obtain them!' });
+        }
         let unitPrice = item.price;
         let bonusMessages = [];
 

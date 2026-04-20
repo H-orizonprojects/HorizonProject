@@ -168,6 +168,11 @@ function setupAdminControls() {
     });
     const adminPanel = document.getElementById('adminControls');
     if (adminPanel && isAdmin) adminPanel.classList.remove('hidden');
+
+    const materialTab = document.getElementById('materialTabBtn');
+    if (materialTab && !isAdmin) {
+        materialTab.style.display = 'none';
+    }
 }
 
 // ═══════════════════════════════════════════════

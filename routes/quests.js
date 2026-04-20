@@ -103,8 +103,8 @@ router.post('/claim', isAuthenticated, async (req, res) => {
             rewardMsg = `ได้รับ ${finalGalleons} Galleons!`;
         } else if (quest.rewardType === 'material') {
             const Item = require('../models/Item');
-            // Give a random common/rare material
-            const materials = await Item.find({ type: 'material', rarity: { $in: ['common', 'rare'] } });
+            // Give a random common/uncommon/rare material
+            const materials = await Item.find({ type: 'material', rarity: { $in: ['common', 'uncommon', 'rare'] } });
             if (materials.length > 0) {
                 const randomMat = materials[Math.floor(Math.random() * materials.length)];
                 const existing = user.inventory.find(i => i.itemId.toString() === randomMat._id.toString());
