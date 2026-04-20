@@ -107,7 +107,7 @@ router.post('/claim', isAuthenticated, async (req, res) => {
             const materials = await Item.find({ type: 'material', rarity: { $in: ['common', 'uncommon', 'rare'] } });
             if (materials.length > 0) {
                 const randomMat = materials[Math.floor(Math.random() * materials.length)];
-                const existing = user.inventory.find(i => i.itemId.toString() === randomMat._id.toString());
+                const existing = user.inventory.find(i => i.itemId && i.itemId.toString() === randomMat._id.toString());
                 if (existing) {
                     existing.quantity += quest.rewardAmount;
                 } else {

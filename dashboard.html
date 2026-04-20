@@ -865,6 +865,29 @@
                             box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
                             transform: translateY(-2px);
                         }
+
+                        .shop-load-more {
+                            background: rgba(10, 5, 20, 0.8);
+                            border: 1px solid #d4af37;
+                            color: #d4af37;
+                            padding: 0.8rem 2rem;
+                            border-radius: 30px;
+                            font-family: 'Cinzel', serif;
+                            font-size: 1rem;
+                            font-weight: bold;
+                            cursor: pointer;
+                            transition: all 0.3s ease;
+                            text-transform: uppercase;
+                            letter-spacing: 2px;
+                            box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+                        }
+
+                        .shop-load-more:hover {
+                            background: rgba(212, 175, 55, 0.15);
+                            color: #f0e6c8;
+                            transform: translateY(-2px);
+                            box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+                        }
                     </style>
                     <div class="shop-category-tabs">
                         <button class="shop-tab active" onclick="filterShop('all', this)">All</button>
@@ -885,7 +908,7 @@
                     <!-- Items injected here -->
                 </div>
                 <div id="shopPagination" style="text-align: center; margin-top: 2rem; display: none;">
-                    <button id="loadMoreShopBtn" class="shop-tab" onclick="loadMoreShopItems()">Load More Magical Goods</button>
+                    <button id="loadMoreShopBtn" class="shop-load-more" onclick="loadMoreShopItems()">Load More Magical Goods</button>
                 </div>
             </section>
 

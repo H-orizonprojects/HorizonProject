@@ -167,7 +167,13 @@ router.get('/image/:id', async (req, res) => {
 
 // ── POST /buy ─────────────────────────────────────────────────────────────────
 router.post('/buy', isAuthenticated, isNotDetained, sanitizeBody, async (req, res) => {
-    const { itemId, quantity } = req.body;
+    let { itemId, quantity } = req.body;
+
+    // Validate quantity to prevent NaN CastError
+    quantity = parseInt(quantity);
+    if (!quantity || isNaN(quantity) || quantity < 1) {
+        return res.status(400).json({ message: 'Invalid quantity' });
+    }
 
     try {
         const item = await Item.findById(itemId);
@@ -206,8 +212,8 @@ router.post('/buy', isAuthenticated, isNotDetained, sanitizeBody, async (req, re
 
         // ── Active pet buff: Owl shop_bonus_chance (10% free item) ───────────
         if (user.activePetId) {
-            const activePet = user.pets.find(p => p._id.toString() === user.activePetId.toString());
-            if (activePet) {
+            const activePet = user.pets.find(p => p._id && p._id.toString() === user.activePetId.toString());
+            if (activePet && activePet.buffs) {
                 const bonusBuff = activePet.buffs.find(b => b.target === 'shop_bonus_chance');
                 if (bonusBuff && Math.random() * 100 < bonusBuff.value) {
                     finalQuantity += 1;
@@ -216,7 +222,7 @@ router.post('/buy', isAuthenticated, isNotDetained, sanitizeBody, async (req, re
             }
         }
 
-        const existingItemIndex = user.inventory.findIndex(i => i.itemId.toString() === itemId);
+        const existingItemIndex = user.inventory.findIndex(i => i.itemId && i.itemId.toString() === itemId.toString());
         if (existingItemIndex > -1) {
             user.inventory[existingItemIndex].quantity += finalQuantity;
         } else {
