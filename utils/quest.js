@@ -57,9 +57,10 @@ async function updateQuestProgress(userId, questType, increment = 1) {
             await user.save();
         }
     } catch (err) {
+        // Log the full error but DO NOT re-throw — quest progress is secondary.
+        // Propagating this error would cause the parent route (send_gift, buy_item, craft)
+        // to return 500 even though the main action already succeeded.
         console.error('[Quest] updateQuestProgress failed for type=%s user=%s: %s', questType, userId, err.message);
-        // Re-throw so callers can surface the real error instead of silently losing progress
-        throw err;
     }
 }
 

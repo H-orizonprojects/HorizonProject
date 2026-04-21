@@ -107,8 +107,14 @@ router.post('/claim', isAuthenticated, async (req, res) => {
             const materials = await Item.find({ type: 'material', rarity: { $in: ['common', 'uncommon', 'rare'] } });
             if (materials.length > 0) {
                 const randomMat = materials[Math.floor(Math.random() * materials.length)];
-                // Filter ghost slots FIRST to prevent null.toString() crash
-                user.inventory = user.inventory.filter(i => i.itemId != null);
+                
+                // Safely remove ghost slots in-place
+                for (let i = user.inventory.length - 1; i >= 0; i--) {
+                    if (!user.inventory[i] || user.inventory[i].itemId == null) {
+                        user.inventory.splice(i, 1);
+                    }
+                }
+                
                 const existing = user.inventory.find(i => i.itemId.toString() === randomMat._id.toString());
                 if (existing) {
                     existing.quantity += quest.rewardAmount;
@@ -123,9 +129,16 @@ router.post('/claim', isAuthenticated, async (req, res) => {
         }
         
         quest.isClaimed = true;
-        // Filter out ghost inventory slots (itemId = null) to prevent Mongoose validation failures
-        user.inventory = user.inventory.filter(i => i.itemId != null);
+        
+        // Safely remove ghost slots in-place again just in case
+        for (let i = user.inventory.length - 1; i >= 0; i--) {
+            if (!user.inventory[i] || user.inventory[i].itemId == null) {
+                user.inventory.splice(i, 1);
+            }
+        }
+        
         user.markModified('inventory');
+        user.markModified('dailyQuests'); // Adding this for good measure
         await user.save();
         
         res.json({ message: rewardMsg, balance: user.balance, quests: user.dailyQuests });
