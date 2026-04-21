@@ -269,6 +269,8 @@ router.post('/use', isAuthenticated, isNotDetained, sanitizeBody, async (req, re
 
     try {
         const user = await User.findById(req.user.id);
+        // Filter ghost slots FIRST to prevent null.toString() crash
+        user.inventory = user.inventory.filter(i => i.itemId != null);
         const slot = user.inventory.find(i => i.itemId.toString() === itemId);
 
         if (!slot || slot.quantity <= 0) {

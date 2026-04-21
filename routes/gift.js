@@ -40,6 +40,9 @@ router.post('/send', isAuthenticated, sanitizeBody, async (req, res) => {
         const item = await Item.findById(itemId);
         if (!item) return res.status(404).json({ message: 'Item not found in archives.' });
 
+        // Filter ghost slots FIRST to prevent null.toString() crash
+        sender.inventory = sender.inventory.filter(i => i.itemId != null);
+
         // Check if sender has enough of the item
         const senderItemIndex = sender.inventory.findIndex(i => i.itemId.toString() === itemId);
         if (senderItemIndex === -1 || sender.inventory[senderItemIndex].quantity < sendQuantity) {

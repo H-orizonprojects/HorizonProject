@@ -115,6 +115,8 @@ router.post('/changeName', isAuthenticated, sanitizeBody, async (req, res) => {
 
     try {
         const user = await User.findById(req.user.id);
+        // Filter ghost slots FIRST to prevent null.toString() crash
+        user.inventory = user.inventory.filter(i => i.itemId != null);
         const itemIdx = user.inventory.findIndex(i => i.itemId.toString() === itemId);
 
         if (itemIdx === -1 || user.inventory[itemIdx].quantity < 1) {

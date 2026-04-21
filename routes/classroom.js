@@ -37,6 +37,8 @@ router.post('/herbs/plant', isAuthenticated, sanitizeBody, async (req, res) => {
     try {
         // Verify user has seed in inventory
         const user = await User.findById(req.user.id);
+        // Filter ghost slots FIRST to prevent null.toString() crash
+        user.inventory = user.inventory.filter(i => i.itemId != null);
         const invSlot = user.inventory.find(i => i.itemId.toString() === seedItemId);
         if (!invSlot || invSlot.quantity < 1) return res.status(400).json({ message: 'You do not have this seed' });
 
@@ -182,6 +184,8 @@ router.post('/herbs/harvest', isAuthenticated, sanitizeBody, async (req, res) =>
                 }
             }
 
+            // Filter ghost slots FIRST to prevent null.toString() crash
+            user.inventory = user.inventory.filter(i => i.itemId != null);
             const existingIdx = user.inventory.findIndex(i => i.itemId.toString() === plot.herbItemId.toString());
             if (existingIdx > -1) user.inventory[existingIdx].quantity += harvestQty;
             else user.inventory.push({ itemId: plot.herbItemId, quantity: harvestQty });

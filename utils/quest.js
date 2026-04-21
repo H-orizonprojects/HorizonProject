@@ -51,10 +51,15 @@ async function updateQuestProgress(userId, questType, increment = 1) {
         }
 
         if (updated) {
+            // Filter ghost slots before save to prevent CastErrors
+            user.inventory = user.inventory.filter(i => i.itemId != null);
+            user.markModified('inventory');
             await user.save();
         }
     } catch (err) {
-        console.error('Error updating quest progress:', err);
+        console.error('[Quest] updateQuestProgress failed for type=%s user=%s: %s', questType, userId, err.message);
+        // Re-throw so callers can surface the real error instead of silently losing progress
+        throw err;
     }
 }
 

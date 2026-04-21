@@ -183,6 +183,8 @@ router.post('/cleanse', isAuthenticated, isNotDetained, async (req, res) => {
         const cleansingPotion = await Item.findOne({ name: 'Cleansing Potion' });
         if (!cleansingPotion) return res.status(400).json({ message: 'Cleansing Potion does not exist yet.' });
 
+        // Filter ghost slots FIRST to prevent null.toString() crash
+        user.inventory = user.inventory.filter(i => i.itemId != null);
         const potionSlot = user.inventory.find(i => i.itemId.toString() === cleansingPotion._id.toString());
         if (!potionSlot || potionSlot.quantity < 1) {
             return res.status(400).json({ message: '🧪 คุณไม่มี Cleansing Potion! รีบไปคราฟต์ที่ Craft Station!' });

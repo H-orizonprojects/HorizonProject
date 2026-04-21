@@ -96,6 +96,8 @@ router.post('/incubate', ensureAuth, async (req, res) => {
             return res.status(400).json({ message: 'Incubator is already occupied!' });
         }
 
+        // Filter ghost slots FIRST to prevent null.toString() crash
+        user.inventory = user.inventory.filter(i => i.itemId != null);
         const invItemIndex = user.inventory.findIndex(i => i.itemId.toString() === itemId);
         if (invItemIndex === -1 || user.inventory[invItemIndex].quantity < 1) {
             return res.status(400).json({ message: 'You do not own this egg.' });
@@ -150,6 +152,8 @@ router.post('/boost', ensureAuth, async (req, res) => {
         const potionItem = await Item.findOne({ name: 'Incubation Potion' });
         if (!potionItem) return res.status(400).json({ message: 'Incubation Potion does not exist yet.' });
 
+        // Filter ghost slots FIRST to prevent null.toString() crash
+        user.inventory = user.inventory.filter(i => i.itemId != null);
         const potionSlot = user.inventory.find(i => i.itemId.toString() === potionItem._id.toString());
         if (!potionSlot || potionSlot.quantity < 1) {
             return res.status(400).json({ message: 'You do not have an Incubation Potion in your inventory.' });
@@ -304,6 +308,9 @@ router.post('/feed', ensureAuth, async (req, res) => {
 
         const pet = user.pets.find(p => p._id.toString() === petId);
         if (!pet) return res.status(404).json({ message: 'Pet not found.' });
+
+        // Filter ghost slots FIRST to prevent null.toString() crash
+        user.inventory = user.inventory.filter(i => i.itemId != null);
 
         // Get all items in user's inventory to find available pet food
         const invItemIds = user.inventory.map(i => i.itemId);
