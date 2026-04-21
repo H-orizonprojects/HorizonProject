@@ -203,8 +203,10 @@ router.post('/gather', isAuthenticated, isNotDetained, sanitizeBody, async (req,
         const randomItem = potentialItems[Math.floor(Math.random() * potentialItems.length)];
 
         // 5. Give to user
+        // Filter ghost slots FIRST to prevent null.toString() crash
+        user.inventory = user.inventory.filter(i => i.itemId != null);
+        const quantityGained = 1;
         const existingItemIndex = user.inventory.findIndex(i => i.itemId.toString() === randomItem._id.toString());
-        const quantityGained = 1; // Or random amount?
         
         if (existingItemIndex > -1) {
             user.inventory[existingItemIndex].quantity += quantityGained;
@@ -212,8 +214,6 @@ router.post('/gather', isAuthenticated, isNotDetained, sanitizeBody, async (req,
             user.inventory.push({ itemId: randomItem._id, quantity: quantityGained });
         }
 
-        // Filter ghost slots before save
-        user.inventory = user.inventory.filter(i => i.itemId != null);
         user.markModified('inventory');
         await user.save();
 

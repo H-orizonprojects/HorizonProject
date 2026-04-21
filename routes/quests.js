@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { isAuthenticated } = require('../middleware/auth');
 const User = require('../models/User');
+const Item = require('../models/Item');
 
 const QUEST_TYPES = [
     { type: 'explore_himmapan', target: 2, label: 'เอาตัวรอดในป่าหิมพานต์ 2 ครั้ง', rng: () => ({ target: 1 + Math.floor(Math.random() * 2) }) },
@@ -102,12 +103,13 @@ router.post('/claim', isAuthenticated, async (req, res) => {
             user.balance += finalGalleons;
             rewardMsg = `ได้รับ ${finalGalleons} Galleons!`;
         } else if (quest.rewardType === 'material') {
-            const Item = require('../models/Item');
             // Give a random common/uncommon/rare material
             const materials = await Item.find({ type: 'material', rarity: { $in: ['common', 'uncommon', 'rare'] } });
             if (materials.length > 0) {
                 const randomMat = materials[Math.floor(Math.random() * materials.length)];
-                const existing = user.inventory.find(i => i.itemId && i.itemId.toString() === randomMat._id.toString());
+                // Filter ghost slots FIRST to prevent null.toString() crash
+                user.inventory = user.inventory.filter(i => i.itemId != null);
+                const existing = user.inventory.find(i => i.itemId.toString() === randomMat._id.toString());
                 if (existing) {
                     existing.quantity += quest.rewardAmount;
                 } else {
@@ -129,7 +131,7 @@ router.post('/claim', isAuthenticated, async (req, res) => {
         res.json({ message: rewardMsg, balance: user.balance, quests: user.dailyQuests });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: 'Server error: ' + (err.message || 'Unknown error') });
     }
 });
 

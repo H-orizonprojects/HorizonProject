@@ -143,6 +143,9 @@ router.post('/craft', isAuthenticated, isNotDetained, sanitizeBody, async (req, 
 
         const user = await User.findById(req.user.id);
 
+        // Filter ghost slots FIRST to prevent null.toString() crash
+        user.inventory = user.inventory.filter(i => i.itemId != null);
+
         // Check ingredients
         for (const ingredient of recipe.ingredients) {
             const userItem = user.inventory.find(i => i.itemId.toString() === ingredient.itemId._id.toString());
@@ -219,6 +222,8 @@ router.post('/craft', isAuthenticated, isNotDetained, sanitizeBody, async (req, 
                 ? recipe.resultItemId._id.toString()
                 : recipe.resultItemId.toString();
 
+            // Re-filter after deductions (quantities may now be 0)
+            user.inventory = user.inventory.filter(i => i.itemId != null && i.quantity > 0);
             const resultItemIndex = user.inventory.findIndex(i => i.itemId.toString() === resultId);
             if (resultItemIndex > -1) {
                 user.inventory[resultItemIndex].quantity += 1;
