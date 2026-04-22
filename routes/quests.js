@@ -45,9 +45,9 @@ function generateQuests() {
     
     return selected.map(q => {
         const specs = q.rng();
-        const rewardType = Math.random() > 0.5 ? 'galleons' : 'material';
+        const rewardType = 'galleons';
         // Enforce max 50 Galleons limit strictly: Math.floor(rng * 41) is [0, 40] -> + 10 = [10, 50]
-        const rewardAmount = rewardType === 'galleons' ? Math.floor(10 + Math.random() * 41) : 1; 
+        const rewardAmount = Math.floor(10 + Math.random() * 41); 
         return {
             questType: q.type,
             target: specs.target,
