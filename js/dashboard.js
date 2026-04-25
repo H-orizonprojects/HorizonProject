@@ -1322,9 +1322,10 @@ async function loadAdminData() {
         }
     });
 
-    const sendItemDataList = document.getElementById('adminItemOptions');
-    if (sendItemDataList && sendItemDataList.children.length === 0) {
-        sendItemDataList.innerHTML = items.map(i => `<option value="${i._id}">${i.name} (${i.type})</option>`).join('');
+    const sendItemSelect = document.getElementById('adminSendItemSelect');
+    if (sendItemSelect && sendItemSelect.options && sendItemSelect.options.length <= 1) {
+        sendItemSelect.innerHTML = '<option value="" disabled selected>-- โปรดเลือกไอเทม --</option>' + 
+            items.map(i => `<option value="${i._id}">${i.name} (${i.type})</option>`).join('');
     }
 
     // Attach listener for ingredient previews
