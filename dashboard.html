@@ -1237,6 +1237,41 @@
                             style="background:#5c2a2a;color:#ff9999;border-color:#8a3d3d;">Send to Detention</button>
                     </div>
 
+                    <!-- Admin: Send Item / Material -->
+                    <div class="admin-card">
+                        <h3>🎁 Send Item / Material</h3>
+                        <div class="input-group">
+                            <label>Target — username หรือ ยศบ้าน</label>
+                            <div style="display:flex; gap:0.4rem; flex-wrap:wrap; margin-bottom:0.5rem;">
+                                <button type="button" class="admin-btn small"
+                                    style="padding:0.25rem 0.6rem;font-size:0.72rem;background:#1a2a3a;border-color:#3a6a9a;color:#6ab0f5;"
+                                    onclick="document.getElementById('adminSendTarget').value='garuda'">🦅 Garuda</button>
+                                <button type="button" class="admin-btn small"
+                                    style="padding:0.25rem 0.6rem;font-size:0.72rem;background:#1a3a1a;border-color:#3a7a3a;color:#6af56a;"
+                                    onclick="document.getElementById('adminSendTarget').value='naga'">🐍 Naga</button>
+                                <button type="button" class="admin-btn small"
+                                    style="padding:0.25rem 0.6rem;font-size:0.72rem;background:#2a2a1a;border-color:#7a7a2a;color:#f5e46a;"
+                                    onclick="document.getElementById('adminSendTarget').value='qilin'">🦌 Qilin</button>
+                                <button type="button" class="admin-btn small"
+                                    style="padding:0.25rem 0.6rem;font-size:0.72rem;background:#2a1a1a;border-color:#7a3a1a;color:#f5a06a;"
+                                    onclick="document.getElementById('adminSendTarget').value='erawan'">🐘 Erawan</button>
+                            </div>
+                            <input type="text" id="adminSendTarget" class="parchment-input"
+                                placeholder="username / garuda / naga...">
+                        </div>
+                        <div class="input-group">
+                            <label>Item Name / ID (You can use Item ID)</label>
+                            <select id="adminSendItemSelect" class="parchment-input">
+                                <option value="" disabled selected>Loading items...</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Quantity</label>
+                            <input type="number" id="adminSendQuantity" class="parchment-input" value="1" min="1">
+                        </div>
+                        <button onclick="adminSendItem()" class="conjure-btn" style="width: 100%; margin-top: 0.5rem; padding: 0.5rem;">Send via Owl 🦉</button>
+                    </div>
+
                     <!-- Admin: Server Boosters -->
                     <div class="admin-card" style="grid-column: 1 / -1;">
                         <h3>✨ Edit Server Boosters</h3>

@@ -1322,6 +1322,12 @@ async function loadAdminData() {
         }
     });
 
+    const sendItemSelect = document.getElementById('adminSendItemSelect');
+    if (sendItemSelect && sendItemSelect.options.length <= 1) {
+        sendItemSelect.innerHTML = '<option value="" disabled selected>-- โปรดเลือกไอเทม --</option>' + 
+            items.map(i => `<option value="${i._id}">${i.name} (${i.type})</option>`).join('');
+    }
+
     // Attach listener for ingredient previews
     document.querySelectorAll('.ing-item').forEach(attachIngredientListener);
     // Load current recipes for management

@@ -95,6 +95,64 @@ router.post('/send', isAuthenticated, sanitizeBody, async (req, res) => {
     }
 });
 
+// Admin: Send Gift/Item to User or House (Professor Control)
+router.post('/admin/send', isAuthenticated, hasRole(['admin', 'professor']), sanitizeBody, async (req, res) => {
+    const { targetType, targetId, itemId, quantity, message } = req.body;
+    const sendQuantity = parseInt(quantity) || 1;
+
+    try {
+        const item = await Item.findById(itemId);
+        if (!item) return res.status(404).json({ message: 'Item not found in archives.' });
+
+        let recipients = [];
+
+        if (targetType === 'user') {
+            const user = await User.findOne({
+                $or: [{ discordId: targetId }, { username: targetId }]
+            });
+            if (user) recipients.push(user);
+        } else if (targetType === 'house') {
+            if (targetId.toLowerCase() === '@all') {
+                recipients = await User.find({ roles: 'student' });
+            } else {
+                const validHouses = ['garuda', 'naga', 'qilin', 'erawan'];
+                if (validHouses.includes(targetId.toLowerCase())) {
+                    const caseInsensitiveHouse = new RegExp('^' + targetId + '$', 'i');
+                    recipients = await User.find({ roles: caseInsensitiveHouse });
+                }
+            }
+        }
+
+        if (recipients.length === 0) {
+            return res.status(404).json({ message: 'No recipients found.' });
+        }
+
+        const sender = await User.findById(req.user.id);
+        const giftsToInsert = [];
+
+        for (const recipient of recipients) {
+            giftsToInsert.push({
+                senderId: sender._id,
+                senderName: `Professor ${sender.username}`,
+                recipientId: recipient._id,
+                recipientName: recipient.username,
+                itemId: item._id,
+                quantity: sendQuantity,
+                message: message || `A special item granted by Professor ${sender.username}`,
+                isClaimed: false
+            });
+        }
+
+        if (giftsToInsert.length > 0) {
+            await Gift.insertMany(giftsToInsert);
+        }
+
+        res.json({ message: `Successfully sent ${sendQuantity}x ${item.name} to ${recipients.length} student(s)!` });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
 // View Inbox (list unclaimed gifts)
 router.get('/inbox', isAuthenticated, async (req, res) => {
     try {
