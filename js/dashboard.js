@@ -1323,7 +1323,7 @@ async function loadAdminData() {
     });
 
     const sendItemDataList = document.getElementById('adminItemOptions');
-    if (sendItemDataList && sendItemDataList.options.length === 0) {
+    if (sendItemDataList && sendItemDataList.children.length === 0) {
         sendItemDataList.innerHTML = items.map(i => `<option value="${i._id}">${i.name} (${i.type})</option>`).join('');
     }
 
@@ -2657,5 +2657,49 @@ function updateMagicBgCanvas(tabId) {
                 canvas.style.display = 'none';
             }
         }, 1000);
+    }
+}
+
+// ── Admin: Send Item / Material ──
+window.adminSendItem = async function() {
+    const targetInput = document.getElementById('adminSendTarget').value.trim();
+    const itemId = document.getElementById('adminSendItemSelect').value;
+    const quantity = parseInt(document.getElementById('adminSendQuantity').value) || 1;
+
+    if (!targetInput) return spawnEffect('❌', 'Please specify a target username or house!');
+    if (!itemId) return spawnEffect('❌', 'Please select an item!');
+
+    const validHouses = ['garuda', 'naga', 'qilin', 'erawan', '@all'];
+    let targetType = 'user';
+    let targetId = targetInput;
+    
+    if (validHouses.includes(targetInput.toLowerCase())) {
+        targetType = 'house';
+    }
+
+    if (!confirm(`Are you sure you want to send ${quantity} item(s) to ${targetInput}?`)) return;
+
+    try {
+        const res = await fetch('/api/gift/admin/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                targetType,
+                targetId: targetInput,
+                itemId,
+                quantity
+            })
+        });
+        const data = await res.json();
+        if (res.ok) {
+            spawnEffect('✨', data.message || 'Items sent successfully!');
+            document.getElementById('adminSendTarget').value = '';
+            document.getElementById('adminSendQuantity').value = '1';
+        } else {
+            spawnEffect('❌', data.message || 'Failed to send item');
+        }
+    } catch (err) {
+        console.error(err);
+        spawnEffect('❌', 'Server error while sending items');
     }
 }
