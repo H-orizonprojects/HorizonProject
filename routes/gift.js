@@ -4,7 +4,7 @@ const User = require('../models/User');
 const Item = require('../models/Item');
 const Gift = require('../models/Gift');
 const Transaction = require('../models/Transaction');
-const { isAuthenticated } = require('../middleware/auth');
+const { isAuthenticated, hasRole } = require('../middleware/auth');
 const { sanitizeBody } = require('../middleware/sanitize');
 const crypto = require('crypto');
 
