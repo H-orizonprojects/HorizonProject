@@ -1260,10 +1260,10 @@
                                 placeholder="username / garuda / naga...">
                         </div>
                         <div class="input-group">
-                            <label>Item Name / ID (You can use Item ID)</label>
-                            <select id="adminSendItemSelect" class="parchment-input">
-                                <option value="" disabled selected>Loading items...</option>
-                            </select>
+                            <label>Item Name / ID (พิมพ์ค้นหาชื่อ หรือใส่ Item ID ได้เลย)</label>
+                            <input list="adminItemOptions" id="adminSendItemSelect" class="parchment-input" placeholder="-- พิมพ์ชื่อไอเทมที่ต้องการค้นหา --">
+                            <datalist id="adminItemOptions">
+                            </datalist>
                         </div>
                         <div class="input-group">
                             <label>Quantity</label>
