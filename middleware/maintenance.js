@@ -2,48 +2,50 @@
  * @layer L4 — Transport
  * Maintenance Mode Middleware
  * 
- * Blocks student access to the dashboard temporarily (e.g., end of semester).
+ * Reads the `dashboard_closed` Config from MongoDB (same as the existing
+ * admin toggle in routes/users.js) and blocks student access when enabled.
  * Admins and Professors can still access the dashboard.
- * 
- * Toggle via:
- *   - Environment variable: MAINTENANCE_MODE=true
- *   - API endpoint: POST /api/admin/maintenance (requires admin role)
  */
 
 'use strict';
 
-// ── In-memory state (survives until server restart) ──
-let maintenanceEnabled = process.env.MAINTENANCE_MODE === 'true';
-let maintenanceMessage = process.env.MAINTENANCE_MESSAGE 
-    || '🏰 The Magical Dashboard is temporarily closed for the end-of-semester break. Please check back when the new term begins!';
-let maintenanceUntil = process.env.MAINTENANCE_UNTIL || null; // ISO date string, e.g. "2026-06-01T00:00:00Z"
+const Config = require('../models/Config');
+
+// ── In-memory cache to avoid hitting DB on every request ──
+let _cache = { isClosed: false, message: '', checkedAt: 0 };
+const CACHE_TTL = 10 * 1000; // 10 seconds — short enough to pick up changes quickly
 
 /**
- * Check if maintenance mode is currently active.
- * If a `maintenanceUntil` date is set, maintenance auto-disables after that date.
+ * Refresh the cached status from MongoDB (if stale).
  */
-function isMaintenanceActive() {
-    if (!maintenanceEnabled) return false;
+async function refreshCache() {
+    const now = Date.now();
+    if (now - _cache.checkedAt < CACHE_TTL) return _cache;
 
-    // Auto-disable if the scheduled end date has passed
-    if (maintenanceUntil) {
-        const endDate = new Date(maintenanceUntil);
-        if (!isNaN(endDate.getTime()) && Date.now() >= endDate.getTime()) {
-            maintenanceEnabled = false;
-            console.log('[Maintenance] ⏰ Scheduled maintenance period has ended — auto-disabled.');
-            return false;
-        }
+    try {
+        const config = await Config.findOne({ key: 'dashboard_closed' }).lean();
+        _cache = {
+            isClosed: config?.value === true,
+            message: config?.message || '🏰 ระบบปิดชั่วคราว กรุณารอสักครู่...',
+            checkedAt: now
+        };
+    } catch (err) {
+        console.error('[Maintenance] Failed to read config:', err.message);
+        // On error, keep previous cache state
+        _cache.checkedAt = now;
     }
 
-    return true;
+    return _cache;
 }
 
 /**
- * Middleware: blocks non-admin users from accessing the dashboard.
+ * Middleware: blocks non-admin users when dashboard_closed config is true.
  * Admins/Professors pass through normally.
  */
-function maintenanceGuard(req, res, next) {
-    if (!isMaintenanceActive()) return next();
+async function maintenanceGuard(req, res, next) {
+    const status = await refreshCache();
+
+    if (!status.isClosed) return next();
 
     // Allow admins and professors through
     const userRoles = req.user?.roles || [];
@@ -52,14 +54,13 @@ function maintenanceGuard(req, res, next) {
     }
 
     // Check if this is an API request
-    const isApi = req.originalUrl.startsWith('/api/') 
+    const isApi = req.originalUrl.startsWith('/api/')
         || (req.headers['accept'] && req.headers['accept'].includes('application/json'));
 
     if (isApi) {
         return res.status(503).json({
             error: 'maintenance',
-            message: maintenanceMessage,
-            until: maintenanceUntil || null
+            message: status.message
         });
     }
 
@@ -68,27 +69,4 @@ function maintenanceGuard(req, res, next) {
     return res.status(503).sendFile(path.join(__dirname, '..', 'maintenance.html'));
 }
 
-// ── Getters & Setters (used by admin API route) ──
-
-function getStatus() {
-    return {
-        enabled: isMaintenanceActive(),
-        message: maintenanceMessage,
-        until: maintenanceUntil
-    };
-}
-
-function enable(options = {}) {
-    maintenanceEnabled = true;
-    if (options.message) maintenanceMessage = options.message;
-    if (options.until) maintenanceUntil = options.until;
-    console.log(`[Maintenance] 🔒 Dashboard LOCKED — ${maintenanceMessage}`);
-    if (maintenanceUntil) console.log(`[Maintenance] ⏰ Until: ${maintenanceUntil}`);
-}
-
-function disable() {
-    maintenanceEnabled = false;
-    console.log('[Maintenance] 🔓 Dashboard UNLOCKED — students can access again.');
-}
-
-module.exports = { maintenanceGuard, getStatus, enable, disable };
+module.exports = { maintenanceGuard };

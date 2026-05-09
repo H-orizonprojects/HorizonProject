@@ -156,10 +156,6 @@ const petRoutes = require('./routes/pets');
 const divinationRoutes = require('./routes/divination');
 const classroomRoutes = require('./routes/classroom');
 
-// Admin Routes (maintenance toggle — must be BEFORE maintenanceGuard)
-const adminRoutes = require('./routes/admin');
-app.use('/api/admin', adminRoutes);
-
 // ── Maintenance Mode Guard ──
 // Blocks student access to dashboard & APIs when enabled.
 // Admins/professors pass through. Must be AFTER passport but BEFORE protected routes.

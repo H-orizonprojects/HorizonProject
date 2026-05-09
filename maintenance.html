@@ -287,10 +287,10 @@
             }
         })();
 
-        // ── Fetch maintenance info and show countdown ──
+        // ── Fetch maintenance info and show message ──
         (async function () {
             try {
-                const res = await fetch('/api/admin/maintenance/status');
+                const res = await fetch('/api/users/dashboard/status');
                 if (!res.ok) return;
                 const data = await res.json();
 
@@ -298,30 +298,8 @@
                     document.getElementById('maintenanceMsg').textContent = data.message;
                 }
 
-                if (data.until) {
-                    const target = new Date(data.until).getTime();
-                    if (!isNaN(target) && target > Date.now()) {
-                        document.getElementById('countdownContainer').classList.add('active');
-
-                        const tick = () => {
-                            const diff = target - Date.now();
-                            if (diff <= 0) {
-                                location.reload();
-                                return;
-                            }
-                            const d = Math.floor(diff / 86400000);
-                            const h = Math.floor((diff % 86400000) / 3600000);
-                            const m = Math.floor((diff % 3600000) / 60000);
-                            const s = Math.floor((diff % 60000) / 1000);
-                            document.getElementById('cdDays').textContent = String(d).padStart(2, '0');
-                            document.getElementById('cdHours').textContent = String(h).padStart(2, '0');
-                            document.getElementById('cdMins').textContent = String(m).padStart(2, '0');
-                            document.getElementById('cdSecs').textContent = String(s).padStart(2, '0');
-                        };
-                        tick();
-                        setInterval(tick, 1000);
-                    }
-                }
+                // Auto-reload every 30 seconds to check if maintenance is over
+                setTimeout(() => location.reload(), 30000);
             } catch (e) { /* ignore */ }
         })();
     </script>
