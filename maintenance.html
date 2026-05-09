@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Closed — Eternity</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Playfair+Display:ital@0;1&display=swap"
+        rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Cinzel', serif;
+            color: #f0e6c8;
+            overflow: hidden;
+            background: #0a0515;
+        }
+
+        /* ── Animated Background ── */
+        .bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background: radial-gradient(ellipse at 30% 20%, rgba(40, 10, 60, 0.8) 0%, transparent 60%),
+                        radial-gradient(ellipse at 70% 80%, rgba(20, 5, 50, 0.6) 0%, transparent 60%),
+                        linear-gradient(180deg, #0a0515 0%, #1a0828 50%, #0d0618 100%);
+        }
+
+        /* Floating particles */
+        .bg::before, .bg::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        .bg::before {
+            width: 300px; height: 300px;
+            top: 10%; left: 5%;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.06) 0%, transparent 70%);
+            animation-duration: 10s;
+        }
+
+        .bg::after {
+            width: 400px; height: 400px;
+            bottom: 10%; right: 5%;
+            background: radial-gradient(circle, rgba(139, 105, 20, 0.05) 0%, transparent 70%);
+            animation-duration: 12s;
+            animation-delay: -4s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-30px) scale(1.05); }
+        }
+
+        /* ── Stars ── */
+        .stars {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px; height: 2px;
+            background: #d4af37;
+            border-radius: 50%;
+            animation: twinkle 3s ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.5); }
+        }
+
+        /* ── Main Card ── */
+        .card {
+            position: relative;
+            z-index: 10;
+            background: linear-gradient(145deg, rgba(26, 18, 40, 0.97), rgba(13, 6, 24, 0.99));
+            border: 2px solid rgba(212, 175, 55, 0.35);
+            border-radius: 20px;
+            padding: 3.5rem 3rem;
+            max-width: 520px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 0 80px rgba(139, 105, 20, 0.15),
+                        0 0 40px rgba(212, 175, 55, 0.08),
+                        inset 0 0 60px rgba(10, 5, 20, 0.5);
+            animation: cardIn 1s ease-out;
+        }
+
+        @keyframes cardIn {
+            from { opacity: 0; transform: translateY(40px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #d4af37, transparent);
+            border-radius: 20px 20px 0 0;
+        }
+
+        /* ── Lock Icon ── */
+        .lock-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            display: block;
+            animation: pulse-glow 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.4));
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.4)); }
+            50% { transform: scale(1.08); filter: drop-shadow(0 0 35px rgba(212, 175, 55, 0.7)); }
+        }
+
+        .title {
+            font-size: 1.6rem;
+            color: #d4af37;
+            text-shadow: 0 0 30px rgba(212, 175, 55, 0.5);
+            letter-spacing: 3px;
+            margin-bottom: 0.5rem;
+        }
+
+        .divider {
+            color: rgba(212, 175, 55, 0.4);
+            font-size: 0.7rem;
+            letter-spacing: 0.8rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .message {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: #c8b89a;
+            margin-bottom: 2rem;
+        }
+
+        /* ── Countdown ── */
+        .countdown-container {
+            display: none;
+            margin-bottom: 2rem;
+        }
+
+        .countdown-container.active {
+            display: block;
+        }
+
+        .countdown-label {
+            font-size: 0.7rem;
+            color: #8b6914;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 0.75rem;
+        }
+
+        .countdown {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .cd-unit {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .cd-num {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #d4af37;
+            text-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+            min-width: 50px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 8px;
+            padding: 0.3rem 0.5rem;
+        }
+
+        .cd-lbl {
+            font-size: 0.6rem;
+            color: #a89070;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 0.3rem;
+        }
+
+        /* ── Home Button ── */
+        .home-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.7rem 2rem;
+            background: linear-gradient(135deg, #2a1b38, #1a1228);
+            border: 1px solid #8b6914;
+            color: #d4af37;
+            text-decoration: none;
+            border-radius: 30px;
+            font-family: 'Cinzel', serif;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+            box-shadow: 0 0 15px rgba(139, 105, 20, 0.2);
+        }
+
+        .home-btn:hover {
+            background: linear-gradient(135deg, #3a2548, #2a1b38);
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.5);
+            transform: translateY(-3px);
+            color: #fff;
+        }
+
+        .footer-text {
+            margin-top: 2rem;
+            font-size: 0.65rem;
+            color: rgba(168, 144, 112, 0.5);
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg"></div>
+    <div class="stars" id="stars"></div>
+
+    <div class="card">
+        <span class="lock-icon">🔒</span>
+        <h1 class="title">Dashboard Closed</h1>
+        <div class="divider">⟡ ⟡ ⟡ ⟡ ⟡</div>
+        <p class="message" id="maintenanceMsg">
+            🏰 The Magical Dashboard is temporarily closed for the end-of-semester break. 
+            Please check back when the new term begins!
+        </p>
+
+        <div class="countdown-container" id="countdownContainer">
+            <div class="countdown-label">Reopening in</div>
+            <div class="countdown">
+                <div class="cd-unit">
+                    <span class="cd-num" id="cdDays">00</span>
+                    <span class="cd-lbl">Days</span>
+                </div>
+                <div class="cd-unit">
+                    <span class="cd-num" id="cdHours">00</span>
+                    <span class="cd-lbl">Hours</span>
+                </div>
+                <div class="cd-unit">
+                    <span class="cd-num" id="cdMins">00</span>
+                    <span class="cd-lbl">Min</span>
+                </div>
+                <div class="cd-unit">
+                    <span class="cd-num" id="cdSecs">00</span>
+                    <span class="cd-lbl">Sec</span>
+                </div>
+            </div>
+        </div>
+
+        <a href="/" class="home-btn">🏠 Return Home</a>
+
+        <div class="footer-text">— Eternity Magical Academy —</div>
+    </div>
+
+    <script>
+        // ── Generate stars ──
+        (function () {
+            const container = document.getElementById('stars');
+            for (let i = 0; i < 60; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = (Math.random() * 5) + 's';
+                star.style.animationDuration = (2 + Math.random() * 4) + 's';
+                star.style.width = star.style.height = (1 + Math.random() * 2) + 'px';
+                container.appendChild(star);
+            }
+        })();
+
+        // ── Fetch maintenance info and show countdown ──
+        (async function () {
+            try {
+                const res = await fetch('/api/admin/maintenance/status');
+                if (!res.ok) return;
+                const data = await res.json();
+
+                if (data.message) {
+                    document.getElementById('maintenanceMsg').textContent = data.message;
+                }
+
+                if (data.until) {
+                    const target = new Date(data.until).getTime();
+                    if (!isNaN(target) && target > Date.now()) {
+                        document.getElementById('countdownContainer').classList.add('active');
+
+                        const tick = () => {
+                            const diff = target - Date.now();
+                            if (diff <= 0) {
+                                location.reload();
+                                return;
+                            }
+                            const d = Math.floor(diff / 86400000);
+                            const h = Math.floor((diff % 86400000) / 3600000);
+                            const m = Math.floor((diff % 3600000) / 60000);
+                            const s = Math.floor((diff % 60000) / 1000);
+                            document.getElementById('cdDays').textContent = String(d).padStart(2, '0');
+                            document.getElementById('cdHours').textContent = String(h).padStart(2, '0');
+                            document.getElementById('cdMins').textContent = String(m).padStart(2, '0');
+                            document.getElementById('cdSecs').textContent = String(s).padStart(2, '0');
+                        };
+                        tick();
+                        setInterval(tick, 1000);
+                    }
+                }
+            } catch (e) { /* ignore */ }
+        })();
+    </script>
+</body>
+
+</html>

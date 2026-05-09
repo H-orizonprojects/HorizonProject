@@ -156,25 +156,33 @@ const petRoutes = require('./routes/pets');
 const divinationRoutes = require('./routes/divination');
 const classroomRoutes = require('./routes/classroom');
 
-app.use('/api/shop', shopRoutes);
-app.use('/api/craft', craftRoutes);
-app.use('/api/bank', bankRoutes);
-app.use('/api/users', usersRoutes);
-app.use('/api/gift', giftRoutes);
-app.use('/api/forest', forestRoutes);
-app.use('/api/quests', questRoutes);
-app.use('/api/pets', petRoutes);
-app.use('/api/divination', divinationRoutes);
-app.use('/api/classroom', classroomRoutes);
+// Admin Routes (maintenance toggle — must be BEFORE maintenanceGuard)
+const adminRoutes = require('./routes/admin');
+app.use('/api/admin', adminRoutes);
+
+// ── Maintenance Mode Guard ──
+// Blocks student access to dashboard & APIs when enabled.
+// Admins/professors pass through. Must be AFTER passport but BEFORE protected routes.
+const { maintenanceGuard } = require('./middleware/maintenance');
+app.use('/api/shop', maintenanceGuard, shopRoutes);
+app.use('/api/craft', maintenanceGuard, craftRoutes);
+app.use('/api/bank', maintenanceGuard, bankRoutes);
+app.use('/api/users', usersRoutes);  // users route stays open (needed for auth checks)
+app.use('/api/gift', maintenanceGuard, giftRoutes);
+app.use('/api/forest', maintenanceGuard, forestRoutes);
+app.use('/api/quests', maintenanceGuard, questRoutes);
+app.use('/api/pets', maintenanceGuard, petRoutes);
+app.use('/api/divination', maintenanceGuard, divinationRoutes);
+app.use('/api/classroom', maintenanceGuard, classroomRoutes);
 
 const { checkGuildMembership } = require('./middleware/auth');
 
 // ✅ คนที่ออก guild จะถูก redirect ออกทันที
-app.get(['/dashboard', '/dashboard/*path'], checkGuildMembership, (req, res) => {
+app.get(['/dashboard', '/dashboard/*path'], checkGuildMembership, maintenanceGuard, (req, res) => {
     res.sendFile(path.join(__dirname, 'dashboard.html'));
 });
 
-app.get(['/classroom', '/classroom/*path'], checkGuildMembership, (req, res) => {
+app.get(['/classroom', '/classroom/*path'], checkGuildMembership, maintenanceGuard, (req, res) => {
     res.sendFile(path.join(__dirname, 'classroom.html'));
 });
 
